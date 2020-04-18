@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>MapReduce</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+<div id="Notes on MapReduce: Simplified Data Processing on Large Clusters"><h1 id="Notes on MapReduce: Simplified Data Processing on Large Clusters" class="header"><a href="#Notes on MapReduce: Simplified Data Processing on Large Clusters" class="justcenter">Notes on MapReduce: Simplified Data Processing on Large Clusters</a></h1></div>
+<blockquote>
+<em>By Google</em>
+</blockquote>
+
+<div id="Notes on MapReduce: Simplified Data Processing on Large Clusters-Overview"><h2 id="Overview" class="header"><a href="#Notes on MapReduce: Simplified Data Processing on Large Clusters-Overview" class="justcenter">Overview</a></h2></div>
+
+<ol>
+<li>
+Programming model and associated implementation for processing and generating large datasets
+
+<li>
+Map functions process a key/value pair and generate a set of intermediate key/value pairs
+
+<li>
+Reduce merges intermediate pairs into a final value for a key
+
+<li>
+Programs written in this way are automatically parallelised and run on large clusters
+
+</ol>
+
+
+<div id="Notes on MapReduce: Simplified Data Processing on Large Clusters-Intro"><h2 id="Intro" class="header"><a href="#Notes on MapReduce: Simplified Data Processing on Large Clusters-Intro" class="justcenter">Intro</a></h2></div>
+
+<ol>
+<li>
+Large amounts of data made it infeasible to run queries on a single machine.
+
+<li>
+Parallelisation, fault-tolerance, data distribution and load balancing --&gt; MapReduce
+
+</ol>
+
+
+<div id="Notes on MapReduce: Simplified Data Processing on Large Clusters-Programming Model"><h2 id="Programming Model" class="header"><a href="#Notes on MapReduce: Simplified Data Processing on Large Clusters-Programming Model" class="justcenter">Programming Model</a></h2></div>
+
+<ol>
+<li>
+Computation is expressed in two functions (map and reduce, obvs)
+
+<li>
+Types:
+
+<ul>
+<li>
+map (k1, v1) -&gt; list(k2, v2)
+
+<li>
+reduce (k2, list(v2)) -&gt; list(v2)
+
+</ul>
+</ol>
+
+
+<div id="Notes on MapReduce: Simplified Data Processing on Large Clusters-Implementation"><h2 id="Implementation" class="header"><a href="#Notes on MapReduce: Simplified Data Processing on Large Clusters-Implementation" class="justcenter">Implementation</a></h2></div>
+
+<ol>
+<li>
+Distributed Filesystem (GFS?) is used to manage the data stored on the disks of all machines in
+   the MapReduce cluster. FS uses replication to mitigate limitations of commodity hardware.
+
+<li>
+Map invocations are distributed across multiple machines by partitioning input data into a set of
+   splits
+
+<li>
+Splits can be processed in parallel on different machines
+
+<li>
+Reduce invocations are distributed by partitioning intermediate key space into R pieces:
+
+<ul>
+<li>
+R is supplied by the user
+
+<li>
+Partitioning function ~~&gt; hash(key) mod R
+
+</ul>
+<li>
+MapReduce steps:
+
+<ol>
+<li>
+Client library partitions the data into M pieces (16-64 Mb each) and starts up many copies of
+       the MapReduce on a cluster
+
+<li>
+One copy is started as a master and others are workers. Master assigns each idle worker with
+       tasks from M and R
+
+<li>
+Workers with "Map" read their corresponding input split, parse it into key-value pairs and
+       runs the user-defined map on all. Intermediate pairs are buffered in memory.
+
+<li>
+Periodically the buffered pairs are written to local disk, partitioned into R regions by the
+       partitioning function. The locations for the partitions are passed to master
+
+<li>
+Master notifies the reduce workers of the locations of partitions. The reduce worker uses
+       remote procedure calls to read the buffered data from the local disks. When all intermediate
+       keys are read, reducer sorts them by key (to group same keys together)
+
+<li>
+Reducer iterates over the keys found and passes all corresponding intermediate values to the
+       user-defined reduce function. The output of that function is appended to a final output file
+       for this reduce partition
+
+<li>
+When all mappers and reducers terminate, the master wakes up the client by returning from a
+       MapReduce call
+
+</ol>
+<li>
+After successful execution, the output is available in the R output files, one per reducer
+
+<li>
+Fault Tolerance:
+
+<ul>
+<li>
+Worker Failure:
+
+<ul>
+<li>
+The master pings every worker periodically, marking workers that have been quiet for
+          while as failed
+
+<li>
+Any map completed/running task of a failed worker is reset to its initial state and could
+          be scheduled on other workers. Completed tasks are re-executed since their output is
+          stored on the local disk of that machine and therefore is inaccessible on failure.
+          Completed reduce tasks need not to be re-executed, as their output is stored on a global
+          filesystem
+
+<li>
+When a map worker fails and another worker gets assigned to that tasks, all reducers are
+          notified of that change
+
+</ul>
+<li>
+Master Failure:
+
+<ul>
+<li>
+When a master fails, the entire computation is aborted and the client is notified
+
+</ul>
+<li>
+Semantics in the Presence of Failures:
+
+<ul>
+<li>
+MapReduce produces the same results as sequential execution if both functions are
+          deterministic functions of their respective inputs
+
+<li>
+Atomic commits of map and reduce help in achieving this property (saving temporary results
+          on a filesystem)
+
+<li>
+Underlying filesystem must implement atomic rename (otherwise there may be conflicting
+          reduce finishes that try to rename their temporary files into a final output file)
+
+<li>
+The semantics are weaker for the non-deterministic functions of map and/or reduce
+
+</ul>
+<li>
+Locality:
+
+<ul>
+<li>
+Conserving network bandwidth by sharding and replicating shards on three different
+          machines
+
+<li>
+Master takes locations of raw files into account when scheduling the operations to
+          minimise redistribution at runtime
+
+</ul>
+<li>
+Task Granularity:
+
+<ul>
+<li>
+Ideally M and R are much larger than the number of worker machines in the cluster. This
+          would improve dynamic load balancing and speed up recovery when a worker fails
+
+<li>
+The bounds on M and R are in master, as it needs to make O(M+R) scheduling decisions and
+          keeps O(M+R) states in memory
+
+</ul>
+<li>
+Backup Tasks:
+
+<ul>
+<li>
+"Stragglers" - machines that are taking a very long time to execute a step in map or
+          reduce, slowing down the entire computation
+
+<li>
+When a MapReduce is close to completion the master schedules backup tasks for all
+          <em>in-progress</em> tasks to be executed on other machines
+
+</ul>
+</ul>
+<li>
+Refinements:
+
+<ul>
+<li>
+Partitioning Function:
+
+<ul>
+<li>
+Users specify the number of output partitions, data gets partitioned on intermediate keys
+          with the (hash(key) mod R) function
+
+<li>
+It is possible to provide a custom partitioning function (i.e. hash(hostname(url) mod R)
+
+</ul>
+<li>
+Ordering Guarantees:
+
+<ul>
+<li>
+Guarantee that within a given partition, the intermediate key-value pairs are processed in
+          the increasing key order
+
+<li>
+Perk of outputting data in a sorted format
+
+</ul>
+<li>
+Combiner Function:
+
+<ul>
+<li>
+Perform partial merging of the data before it is sent over the network to the reducer
+
+<li>
+Executed on each machine that performs a map task (typically the same as reduce)
+
+</ul>
+<li>
+IO Types:
+
+<ul>
+<li>
+Predefined input file formats or users can define their own <em>readers</em> to integrate with
+          other services (such as databases, etc)
+
+</ul>
+<li>
+Skipping Bad-Records:
+
+<ul>
+<li>
+Bugs in user code cause map or reduce to deterministically crash on certain inputs
+
+<li>
+Detect and skip these records at runtime (if more than one failure occurs on a record)
+
+</ul>
+</ul>
+</ol>
+
+
+<div id="Notes on MapReduce: Simplified Data Processing on Large Clusters-Performance"><h2 id="Performance" class="header"><a href="#Notes on MapReduce: Simplified Data Processing on Large Clusters-Performance" class="justcenter">Performance</a></h2></div>
+
+<ol>
+<li>
+Do we need this section?
+
+</ol>
+
+</body>
+</html>

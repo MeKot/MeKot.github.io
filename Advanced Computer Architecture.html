@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Advanced Computer Architecture</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<p>
+<a href="RISCV-BOOM.html">RISCV-BOOM</a>
+</p>
+
+<p>
+<a href="Questions to answer on BOOM.html">Questions to answer on BOOM</a>
+</p>
+
+<p>
+<a href="ACA Materials.html">ACA Materials</a>
+</p>
+
+<div id="Advanced Computer Architecture"><h1 id="Advanced Computer Architecture" class="header"><a href="#Advanced Computer Architecture" class="justcenter">Advanced Computer Architecture</a></h1></div>
+<blockquote>
+<em>Taking this</em>
+</blockquote>
+
+<ol>
+<li>
+Topics:
+    • How the latest microprocessors work
+    • Why they are built that way – and what are the alternatives?
+    • How you can make software that uses the hardware in the best possible way
+    • How you can make a compiler that does it for you
+    • How you can design a computer for your problem
+    • What does a big computer look like?
+    • What are the fundamental big ideas and challenges in computer architecture?
+    • What is the scope for theory?
+
+<li>
+Have a look at past papers:
+
+<ul>
+<li>
+Some of the exam questions will be based on the article studied in class
+
+<li>
+In the exams - more of an essay ~&gt; Clear and informed thinking about the question at hand
+
+<li>
+20% coursework
+
+</ul>
+<li class="done0">
+Turing award speech from Henessy and Paterson.
+
+<li class="done0">
+John Backus “Can Programming be Liberated from the von Neumann Style?” (1979) (Have a read)
+
+</ol>
+
+
+<div id="Advanced Computer Architecture-MIPS"><h2 id="MIPS" class="header"><a href="#Advanced Computer Architecture-MIPS" class="justcenter">MIPS</a></h2></div>
+
+<ol>
+<li>
+Opcode is always at the same position in the instruction
+
+<li>
+Source register is \\
+
+<li>
+Branch immediate is a memory offset from the current instruction
+
+<li>
+The “Turing Tax” is a term for the overhead (performance, cost, or energy) of universality
+    in this sense
+
+<li>
+ASIC - Application-specific integrated circuit
+
+</ol>
+
+
+<div id="Caches 2"><h1 id="Caches 2" class="header"><a href="#Caches 2" class="justcenter">Caches 2</a></h1></div>
+<blockquote>
+<em>Proper dive 2019-10-15 16:05</em>
+</blockquote>
+
+<ol>
+<li>
+Improving average memory access time:
+
+<ul>
+<li>
+AMAT is a function of hits and misses (hit time + MissRate * MissPenalty)
+
+</ul>
+<li>
+Types of cache misses:
+
+<ul>
+<li>
+Compulsory - fresh data
+
+<li>
+Capacity - data was evicted because we loaded new data
+
+<li>
+Conflict - Cache is not full, but we still evicted a line because we inserted a line that
+          had a conflicting index
+
+<li>
+Coherence - data invalidated by another processor or device
+
+</ul>
+<li>
+Wave speculation (Textbook)
+
+<li>
+Victim Cache -- Search the main cache and the victim cache at the same time:
+
+<ul>
+<li>
+A small cache for things that are being thrown away from the main cache
+
+<li>
+Check the victim cache in parallel with the cache
+
+</ul>
+<li>
+Skewed-associative caches are computing hashes of tags and use the hashes as indices:
+
+<ul>
+<li>
+Could be worse as the worst case scenario is more difficult to avoid
+
+</ul>
+<li>
+Hardware Prefetching:
+
+<ul>
+<li>
+As soon as we have a cache miss, we initiate a fetch for the next block
+
+<li>
+Similar to victim cache, since it has a side-cache, but the dataflow is reversed
+
+<li>
+Always check the stream buffer in parallel with the cache
+
+<li>
+Prefetch n+5 cache lines (enough to cover the access latency)
+
+</ul>
+</ol>
+
+
+<p>
+Reading:
+</p>
+<ul>
+<li>
+The Microarchitecture of the Pentium 4 Processor (Hinton et al, Intel Tech Jnl Q1 2001)
+
+<li>
+The SimpleScalar Tool Set, Version 2.0 (Burger and Austin, <a href="http://www.simplescalar.com/docs/users_guide_v2.pdf)">http://www.simplescalar.com/docs/users_guide_v2.pdf)</a>
+
+<li>
+Wattch: a framework for architectural-level power analysis and optimizations (Brooks et al, ISCA 2000) www.tortolaproject.com/papers/brooks00wattch.pdf
+
+</ul>
+
+<p>
+• Papers:
+– Instruction issue logic for high-performance, interruptable
+pipelined processors.  G. S. Sohi, S. Vajapeyam.
+International Conference on Computer Architecture, 1987
+(<a href="http://doi.acm.org/10.1145/30350.30354)">http://doi.acm.org/10.1145/30350.30354)</a>
+– Towards Kilo-instruction processors. Cristal, Santana,
+Valero, Martinez ACM Trans. Architecture and Code
+Optimization (<a href="http://doi.acm.org/10.1145/1044823.1044825)">http://doi.acm.org/10.1145/1044823.1044825)</a>
+• Other simulators:
+– Simplescalar: www.simplescalar.com/
+– Gem5: <a href="http://www.gem5.org">http://www.gem5.org</a>
+– Liberty: <a href="http://liberty.cs.princeton.edu/">http://liberty.cs.princeton.edu/</a>
+– SimFlex: <a href="http://parsa.epfl.ch/simflex/">http://parsa.epfl.ch/simflex/</a>
+– SIMICS: <a href="http://www.windriver.com/products/simics/">http://www.windriver.com/products/simics/</a>
+</p>
+
+<p>
+<a href="ACA_CW1.html">ACA_CW1</a>
+</p>
+
+<p>
+<a href="ACA CW2.html">ACA CW2</a>
+</p>
+
+</body>
+</html>

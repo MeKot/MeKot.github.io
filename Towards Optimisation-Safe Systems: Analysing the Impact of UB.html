@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Towards Optimisation-Safe Systems: Analysing the Impact of UB</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Towards Optimisation-Safe Systems: Analysing the Impact of UB"><h1 id="Towards Optimisation-Safe Systems: Analysing the Impact of UB" class="header"><a href="#Towards Optimisation-Safe Systems: Analysing the Impact of UB" class="justcenter">Towards Optimisation-Safe Systems: Analysing the Impact of UB</a></h1></div>
+<blockquote>
+<em>Paper by the son of Boris Zeldovich and the grandson of Yakob Zeldovich</em>
+</blockquote>
+
+<ol>
+<li>
+Stack - static checker that precisely identifies unstable code
+
+<li>
+Unstable (Optimisation unstable) code is the one that breaks at higher levels of optimisation
+
+<li>
+Different versions of compilers can discard different types of undefined
+   behaviour due to evolution in optimisation strategies
+
+<li>
+Unstable Code:
+
+<ul>
+<li>
+A code fragment is unstable if it is not legal for a dialect with well-defined semantics
+
+</ul>
+<li>
+Two-phase scheme:
+
+<ul>
+<li>
+Run optimiser without taking advantage of undefined behaviour (optimisations under C*)
+
+<li>
+Run the optimiser again with UP optimisations enabled
+
+<li>
+If extra code is optimised in the second phase, we assume that the code is unstable
+
+</ul>
+</ol>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>RISCV-BOOM</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+<div id="Book Sections to read"><h1 id="Book Sections to read" class="header"><a href="#Book Sections to read" class="justcenter">Book Sections to read</a></h1></div>
+
+<ol>
+<li class="done0">
+ILP                    3, H
+
+<li class="done0">
+Pipelining             C
+
+<li class="done0">
+Low levels of cache    2
+
+<li class="done0">
+SIMDs and GPUs         4
+
+</ol>
+
+
+<p>
+VIPT vs PIPT
+</p>
+
+<div id="Pipeline"><h1 id="Pipeline" class="header"><a href="#Pipeline" class="justcenter">Pipeline</a></h1></div>
+
+<p>
+Fetch -&gt; Pre-Decode (branch prediction based on PC via NLP and FTQ) -&gt; Fetch Buffer -&gt;
+-&gt; Decode -&gt; Register Rename -&gt; ROB + Issue Queue (Dispatch) -&gt; Issued (Polled from the Issue Queue)
+-&gt; Register Read -&gt; Bypass -&gt; Execute (send to a functional unit)
+</p>
+
+
+<div id="Questions"><h1 id="Questions" class="header"><a href="#Questions" class="justcenter">Questions</a></h1></div>
+
+<ol>
+<li>
+How could BOOM support hit-under-miss in IL1-cache?
+
+<ul>
+<li>
+Create a "I am looking for that thing" register/queue for the cache that will stall extra
+     misses but will serve the reads
+
+</ul>
+</ol>
+<p>
+2.
+</p>
+
+
+<div id="Dictionary"><h1 id="Dictionary" class="header"><a href="#Dictionary" class="justcenter">Dictionary</a></h1></div>
+
+<ol>
+<li>
+RVC - RISC-V Compressed
+
+<li>
+Fetch Buffer - FIFO queue that the instructions are fetched into from I1 cache
+
+<li>
+Fetch Packet - Instructions + metadata (such as valid mask and some bred info)
+
+<li>
+Fetch Target Queue (FTQ) - Predictions from BPD:
+
+<ul>
+<li>
+ROB for branch predictions
+
+</ul>
+<li>
+Load/Store Unit: (LSU)
+
+<ul>
+<li>
+LAQ/LDQ (Load Address Queue) - allocated in Decode, has a "store mask" for S*Q dependencies
+
+<li>
+SAQ (Store Address Queue) &amp; SDQ (Store Data Queue) - fired into memory in program order
+
+</ul>
+<li>
+ROB (Reorder Buffer):
+
+<ul>
+<li>
+Tracks the status of every instruction in the pipeline
+
+<li>
+Holds speculative data and committed data (for instructions, i.e. register states..)
+
+<li>
+Populated at dispatch (from the fetch buffer)
+
+</ul>
+<li>
+BTB (Branch Target Buffer) - Table of the branch destination and whether it was taken:
+
+<ul>
+<li>
+BIM (Bimodal Table) --&gt; the table itself
+
+<li>
+RAS (Return address Stack) --&gt; stacktrace (if we are to return?)
+
+<li>
+Tags --&gt; First, tag match to find a BTB entry
+
+<li>
+If there is no entry for the taken branch/jump, it is allocated in it
+
+<li>
+Only updated when NLP made a branch misprediction
+
+</ul>
+<li>
+NLP (Next-line Predictor):
+
+<ul>
+<li>
+Is BTB
+
+<li>
+Small capacity, but expensive in terms of area and power
+
+<li>
+Very simple -&gt; Cannot learn complex or long history patterns
+
+</ul>
+<li>
+BPD (Backing Predictor):
+
+<ul>
+<li>
+Updated mostly during commit to avoid pollution
+
+<li>
+Updated at execute since it relies on global history and needs updating on misspeculation
+
+<li>
+Once all instructions in the info packet have committed the packet is updated and sent to BPD
+      for the BPD to be updated with eventual taken/not taken info
+
+</ul>
+<li>
+GHR (Global History Register):
+
+<ul>
+<li>
+Part of the BPD
+
+<li>
+Contains outcomes of previous n branches (n is the size of GHR)
+
+<li>
+Updated speculatively once the branch is fetched and predicted
+
+<li>
+Each Fetch Packet snapshots the GHR in case of misprediction
+
+<li>
+A Commit copy of the GHR is maintained by the BPD in case of exceptions
+
+</ul>
+<li>
+Branch Rename Snapshots:
+
+<ul>
+<li>
+Metadata and prediction snapshots that are used to fix the branch predictor after
+      mispredictions
+
+</ul>
+<li>
+Rename Map Table - holds speculative mappings from ISA registers to physical registers
+
+<li>
+Committed Map Table - rename map for the committed state (singe-cycle reset)
+
+<li>
+The Busy Table - Tracks the readiness status of each physical register -&gt; fire the instruction
+    when all operands are ready
+
+<li>
+The Free List - Tracks which physical registers are free (bit-vector)
+
+<li>
+Issue Queue - the uops queue that stores uops to be executed on the F-units:
+
+<ul>
+<li>
+Unordered
+
+<li>
+Age-ordered
+
+<li>
+Wake-up
+
+</ul>
+<li>
+Bypass network - is this something like Tomasulo's architecture?
+
+<li>
+CSR (Control Status Register)
+
+<li>
+RVWMO - RISC-V Weak Memory Ordering:
+
+<ul>
+<li>
+Newer loads may execute before older stores
+
+<li>
+Loads to the same address appear in-order
+
+<li>
+Writes can be read early
+
+</ul>
+<li>
+Cache: (data cache is cache-coherent)
+
+<ul>
+<li>
+S0: Send request address
+
+<li>
+S1: Access SRAM
+
+<li>
+S2: Perform way-select and format response data
+
+</ul>
+</ol>
+
+
+<div id="Facts"><h1 id="Facts" class="header"><a href="#Facts" class="justcenter">Facts</a></h1></div>
+
+<ol>
+<li>
+Every branch passed down the pipeline remembers its own PC and its Fetch Packet head PC (in ROB)
+
+</ol>
+
+</body>
+</html>

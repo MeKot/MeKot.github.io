@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Zookeper Notes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+<div id="Notes on ZooKeeper: Wait-free coordination for Internet-scale systems"><h1 id="Notes on ZooKeeper: Wait-free coordination for Internet-scale systems" class="header"><a href="#Notes on ZooKeeper: Wait-free coordination for Internet-scale systems" class="justcenter">Notes on ZooKeeper: Wait-free coordination for Internet-scale systems</a></h1></div>
+<blockquote>
+<em>By Yahoo!</em>
+</blockquote>
+
+<ol>
+<li>
+Intro:
+
+<ul>
+<li>
+Aims to provide a simple and high performance kernel for building coordination primitives in
+      the client
+
+<li>
+Provides per-client guarantee of FIFO execution and linearizability of requests
+
+<li>
+The entire idea is instead of implementing synchronisation primitives server-side, they expose
+      an API and allow clients to define their own
+
+<li>
+Exposed API manipulates simple wait-free data objects organised hierarchially
+
+<li>
+ZooKeeper resembles any other filesystem (Chubby without lock, open and close methods)
+
+<li>
+Exposed API can implement consensus for any number of processes
+
+<li>
+Pipelined architecture --&gt; FIFO per clients for free
+
+<li>
+Guaranteeing FIFO enables clients to submit requests asynchronously:
+
+<ul>
+<li>
+If a new leader is elected, it has to update metadata. Metadata updates are queued
+          asynchronously and initialisation is of sub-second order (compared to synchronous
+          initialisation)
+
+</ul>
+<li>
+Zab --&gt; Leader-based atomic broadcast protocol (to order things)
+
+<li>
+<span id="Notes on ZooKeeper: Wait-free coordination for Internet-scale systems-Read operations are not totally ordered"></span><strong id="Read operations are not totally ordered">Read operations are not totally ordered</strong>
+
+<li>
+Client-side caching is used for things like leader id (observer pattern in cache):
+
+<ul>
+<li>
+Better than Chubby, since Chubby pauses updates to invalidate all caches (that use changed
+          data)
+
+<li>
+Chubby uses leases to manage slow/faulty clients, but ZooKeeper avoids the problem
+          altogether by allowing clients to manage cache
+
+</ul>
+<li>
+Only writes are linearizable
+
+</ul>
+<li>
+The ZooKeeper service:
+
+<ul>
+<li>
+Overview:
+
+<ul>
+<li>
+<em>Client</em> -- user of the ZooKeeper service
+
+<li>
+<em>Server</em> -- process providing the ZooKeeper service
+
+<li>
+<em>Znode</em> -- in-memory data node in the ZooKeeper data
+
+<li>
+Referring to a znode is done with standard UNIX notation of A/B/C
+
+</ul>
+<li>
+Znodes:
+
+<ul>
+<li>
+Regular -- created and deleted by client explicitly
+
+<li>
+Ephemeral -- Created explicitly, deleted explicitly or when the creating session
+          terminates
+
+<li>
+Znodes have a <em>sequential</em> flag set upon creation. If set it appends the value of a
+          monothonically increasing counter to the znodes name
+
+<li>
+<span id="Notes on ZooKeeper: Wait-free coordination for Internet-scale systems-Unlike files, znodes are not designed for general data storage"></span><strong id="Unlike files, znodes are not designed for general data storage">Unlike files, znodes are not designed for general data storage</strong>
+
+<li>
+Have associated metadata, timestamps and version counters (allows tracking and
+          conditional updates)
+
+</ul>
+<li>
+Watches (Observer subscriptions):
+
+<ul>
+<li>
+Update clients in a timely manner and avoid polling
+
+<li>
+Read operations have a watch flag. When set the server promises to notify the client when
+          the information it has just returned (as part of a read) has changed
+
+<li>
+Watches are one-time triggers associated with a session (unregistered once triggered or
+          the session closes)
+
+<li>
+<span id="Notes on ZooKeeper: Wait-free coordination for Internet-scale systems-Watches indicate that a change has happened but do not provide the change"></span><strong id="Watches indicate that a change has happened but do not provide the change">Watches indicate that a change has happened but do not provide the change</strong>
+
+</ul>
+<li>
+Data Model:
+
+<ul>
+<li>
+Filesystem (key/value storage with hierarchial keys) with full data reads and writes
+
+<li>
+Hierarchial namespace is useful for distinguishing applications and setting access rights
+
+</ul>
+<li>
+Sessions:
+
+<ul>
+<li>
+Client connection initiates the session
+
+<li>
+Sessions have a timeout
+
+<li>
+Client marked as faulty if there are no updates from it in the timeout window
+
+<li>
+Session is ended when the client closes it, or marked as faulty
+
+<li>
+Within a session the client observes a succession of state changes (execution of its
+          operations)
+
+<li>
+Sessions enable clients to move transparently from one server to another (persist across
+          servers)
+
+</ul>
+<li>
+Client API:
+
+<ul>
+<li>
+Allows creation, deletion and exists check on znodes
+
+<li>
+Get and set data stored in the znode
+
+<li>
+Get children of a znode
+
+<li>
+Waiting for all updates pending at the start of the operation to propagate to the server
+          that the client is connected to (sync call).
+
+<li>
+All methods have both - synchronous and asynchronous versions available
+
+<li>
+ZooKeeper does not use handles to access znodes (every request uses the full path)
+
+<li>
+Each update method takes an "expected version number" --&gt; enable conditional updates
+
+<li>
+Expected version -1 --&gt; no version check on update
+
+</ul>
+<li>
+Guarantees:
+
+<ul>
+<li>
+FIFO and linearizability (a-linearizability -- client is multithreaded)
+
+<li>
+Read requests are processed locally at each replica
+
+<li>
+Only updates are a-linearizable
+
+<li>
+Example: Leader election - delete the <em>ready</em> znode, update config, create <em>ready</em>
+
+<li>
+Liveness - if a majority of servers are active and communicating the service is available
+
+<li>
+Durability - if the service responds successfully to an update - the update persists
+
+</ul>
+<li>
+Examples of primitives: (implementing more powerful primitives)
+
+<ul>
+<li>
+All primitives are implemented in the client
+
+<li>
+Configuration Management:
+
+<ol>
+<li>
+Configuration is stored in znode A
+
+<li>
+Processes start up with a full path to A
+
+<li>
+Starting processes read A and set the watch flag to be true
+
+<li>
+If A ever changes, they receive the notification and update their config accordingly
+
+<li>
+After they update, they set the watch flag again
+
+</ol>
+<li>
+Rendezvous:
+
+<ol>
+<li>
+Client creates a rendezvous node A
+
+<li>
+Client passes the full path to A as a parameter to its peer
+
+<li>
+When the peer starts, it fills A with all addresses and ports it is using
+
+<li>
+When workers start they watch-read A
+
+</ol>
+<li>
+Group Membership:
+
+<ol>
+<li>
+Use the fact that ephemeral nodes allow us to see the state of the session that
+              created them
+
+<li>
+Create znode A to represent the group
+
+<li>
+When a process in A starts, it creates an ephemeral child of A (A/Ai)
+
+<li>
+To ensure that names are unique (if not already), processes can use the sequential
+              flag
+
+</ol>
+</ul>
+</ul>
+</ol>
+
+</body>
+</html>

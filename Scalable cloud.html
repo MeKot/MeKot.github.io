@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Scalable cloud</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<p>
+<a href="Lessons learned from papers.html">Lessons learned from papers</a>
+</p>
+
+<p>
+<a href="Exam Prep SSD.html">Exam Prep SSD</a>
+</p>
+
+
+<div id="Scalable Cloud"><h1 id="Scalable Cloud" class="header"><a href="#Scalable Cloud" class="justcenter">Scalable Cloud</a></h1></div>
+<blockquote>
+<em>Lecturer seems sound and quite good</em>
+</blockquote>
+
+<ol>
+<li>
+Overview of general distributed scalable systems
+
+<ul>
+<li>
+Search engines (crawl, index and search)
+
+<li>
+Social Networking (response time, large amount of data)
+
+<li>
+Cloud Computing (availability and access to scalable resources)
+
+<li>
+CDNs (Scalable web hosting, file distribution media streaming)
+
+</ul>
+<li>
+Design, data centres and cloud computing, scalable storage and querying, <span id="Scalable Cloud-compute"></span><strong id="compute">compute</strong>
+
+<li>
+These are the papers for storage and querying:
+    – "Bigtable: A Distributed Storage System for Structured Data", Seventh Symposium on Operating
+        System Design and Implementation (OSDI), Seattle, WA, November, 2006
+    – "Dynamo: Amazon's Highly Available Key-Value Store", ACM Symposium on Operating Systems
+        Principles (SOSP), Stevenson, WA, October 2007
+    – "Spanner: Google's Globally-Distributed Database", Tenth Symposium on Operating System Design
+        and Implementation (OSDI), Hollywood, CA, October, 2012
+
+<li>
+Papers for Scalable compute:
+    – "MapReduce: Simplified Data Processing on Large Clusters", Sixth Symposium on Operating
+        System Design and Implementation (OSDI), San Francisco, CA, December, 2004.
+    – "Resilient Distributed Datasets", 9th USENIX conference on Networked Systems Design and
+        Implementation (NSDI), San Jose, CA, April 2012
+
+<li>
+Method for reading papers:
+
+<ol>
+<li>
+Skim the paper and get the gist
+
+<li>
+Come back for a deep read
+
+<li>
+Look at sample questions and find answers in the paper
+
+</ol>
+<li>
+Heinis will deal with scalable data
+
+<li>
+Prepare and work on research papers in lectures and seminars, as one of the courseworks is
+    answering questions on a paper
+
+<li>
+The exam will also have a paper-based question
+
+<li>
+Resources:
+    – “Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable,
+        and Maintainable Systems”, Martin Kleppmann, O'Reilly Media, September 2014:
+
+<ol>
+<li>
+Focuses more on the data management side
+
+<li>
+Recommended
+    – “The Art of Scalability: Scalable Web Architecture, Processes and Organizations for the Modern
+        Enterprise”, Martin L. Abbott, Michael T. Fisher, Addison Wesley, 1st Edition, December 2009:
+
+<li>
+A little more high-level
+
+<li>
+A little outdated
+
+</ol>
+<li>
+Blogs:
+    – <a href="http://highscalability.com/">http://highscalability.com/</a>
+    – <a href="http://www.allthingsdistributed.com/">http://www.allthingsdistributed.com/</a> (Werner Vogel’s blog)
+    – <a href="http://perspectives.mvdirona.com/">http://perspectives.mvdirona.com/</a> (James Hamilton’s blog)
+
+<li>
+Spanner is the hardest paper covered
+
+</ol>
+
+
+<div id="Lecture 1-2"><h1 id="Lecture 1-2" class="header"><a href="#Lecture 1-2" class="justcenter">Lecture 1-2</a></h1></div>
+<blockquote>
+<em>Scalable Distributed Systems</em>
+</blockquote>
+
+<ol>
+<li>
+Mainframe:
+
+<ol>
+<li>
+Single point of failure
+
+<li>
+Does not scale incrementally
+
+<li>
+Slow if used as a CDN
+
+</ol>
+<li>
+Data Centres:
+
+<ol>
+<li>
+Scale out - horizontal
+
+</ol>
+<li>
+Types of Scalable Systems:
+
+<ol>
+<li>
+Online and user-facing (latency of &lt; 100 ms)
+
+<li>
+Batch processing systems (&gt; 1 hr)
+
+<ul>
+<li>
+Hadoop, Spark
+
+<li>
+Offline data processing
+
+</ul>
+<li>
+Nearline systems (&lt; 1 sec)
+
+<ul>
+<li>
+Dynamic content presented to users
+
+<li>
+CDN-ed content
+
+<li>
+Prediction, recommendations, etc..
+
+</ul>
+</ol>
+<li>
+Design principles:
+    • Stateless services
+    • Caching
+    • Partition/aggregation pattern
+    • Weaker consistency
+    • Efficient failure recovery
+
+</ol>
+
+<div id="Lecture 3-4"><h1 id="Lecture 3-4" class="header"><a href="#Lecture 3-4" class="justcenter">Lecture 3-4</a></h1></div>
+<blockquote>
+<em>Missed</em>
+</blockquote>
+
+
+
+<div id="Lecture 5-6"><h1 id="Lecture 5-6" class="header"><a href="#Lecture 5-6" class="justcenter">Lecture 5-6</a></h1></div>
+<blockquote>
+<em>BigTable discussion</em>
+</blockquote>
+
+<ul>
+<li class="done4">
+<span class="todo">TODO</span>: Read the paper and make notes
+
+<li class="done0">
+<span class="todo">TODO</span>: Check the notes against the slides
+
+<li class="done0">
+<span class="todo">TODO</span>: Re-read the notes and update them with stuff from the paper when unclear
+
+<li class="done0">
+<span class="todo">TODO</span>: Find a past exam question on it and do it without notes (but look if you have to)
+
+<li class="done0">
+<span class="todo">TODO</span>: Create a short list of problems this solves with explanations why and how
+
+</ul>
+
+<p>
+<a href="BigTable.html">BigTable</a>
+</p>
+
+<div id="Lecture 7-8"><h1 id="Lecture 7-8" class="header"><a href="#Lecture 7-8" class="justcenter">Lecture 7-8</a></h1></div>
+<blockquote>
+<em>Dynamo discussion</em>
+</blockquote>
+
+<ul>
+<li class="done4">
+<span class="todo">TODO</span>: Read the paper and make notes
+
+<li class="done0">
+<span class="todo">TODO</span>: Check the notes against the slides
+
+<li class="done0">
+<span class="todo">TODO</span>: Re-read the notes and update them with stuff from the paper when unclear
+
+<li class="done0">
+<span class="todo">TODO</span>: Find a past exam question on it and do it without notes (but look if you have to)
+
+<li class="done0">
+<span class="todo">TODO</span>: Create a short list of problems this solves with explanations why and how
+
+</ul>
+
+<p>
+<a href="Dynamo.html">Dynamo</a>
+</p>
+
+<div id="Lecture 9-10"><h1 id="Lecture 9-10" class="header"><a href="#Lecture 9-10" class="justcenter">Lecture 9-10</a></h1></div>
+<blockquote>
+<em>Spanner discussion</em>
+</blockquote>
+
+<ul>
+<li class="done4">
+<span class="todo">TODO</span>: Read the paper and make notes
+
+<li class="done0">
+<span class="todo">TODO</span>: Check the notes against the slides
+
+<li class="done0">
+<span class="todo">TODO</span>: Re-read the notes and update them with stuff from the paper when unclear
+
+<li class="done0">
+<span class="todo">TODO</span>: Find a past exam question on it and do it without notes (but look if you have to)
+
+<li class="done0">
+<span class="todo">TODO</span>: Create a short list of problems this solves with explanations why and how
+
+</ul>
+
+<p>
+<a href="Spanner.html">Spanner</a>
+</p>
+
+
+<div id="Lecture 17-18"><h1 id="Lecture 17-18" class="header"><a href="#Lecture 17-18" class="justcenter">Lecture 17-18</a></h1></div>
+<blockquote>
+<em>MapReduce discussion</em>
+</blockquote>
+
+<ul>
+<li class="done4">
+<span class="todo">TODO</span>: Read the paper and make notes
+
+<li class="done0">
+<span class="todo">TODO</span>: Check the notes against the slides
+
+<li class="done0">
+<span class="todo">TODO</span>: Re-read the notes and update them with stuff from the paper when unclear
+
+<li class="done0">
+<span class="todo">TODO</span>: Find a past exam question on it and do it without notes (but look if you have to)
+
+<li class="done0">
+<span class="todo">TODO</span>: Create a short list of problems this solves with explanations why and how
+
+</ul>
+
+<p>
+<a href="MapReduce.html">MapReduce</a>
+</p>
+
+<div id="Lecture 19-10"><h1 id="Lecture 19-10" class="header"><a href="#Lecture 19-10" class="justcenter">Lecture 19-10</a></h1></div>
+<blockquote>
+<em>Spark discussion</em>
+</blockquote>
+
+<ul>
+<li class="done4">
+<span class="todo">TODO</span>: Read the paper and make notes
+
+<li class="done0">
+<span class="todo">TODO</span>: Check the notes against the slides
+
+<li class="done0">
+<span class="todo">TODO</span>: Re-read the notes and update them with stuff from the paper when unclear
+
+<li class="done0">
+<span class="todo">TODO</span>: Find a past exam question on it and do it without notes (but look if you have to)
+
+<li class="done0">
+<span class="todo">TODO</span>: Create a short list of problems this solves with explanations why and how
+
+</ul>
+
+<p>
+<a href="Spark.html">Spark</a>
+</p>
+
+
+<div id="Lecture 19-10-Coursework"><h2 id="Coursework" class="header"><a href="#Lecture 19-10-Coursework" class="justcenter">Coursework</a></h2></div>
+<blockquote>
+<em>Oh the pain. The pain. It always rains. In my soul</em>
+</blockquote>
+
+<p>
+<a href="Zookeper Notes.html">Zookeper Notes</a>
+</p>
+
+
+<div id="Heinis part"><h1 id="Heinis part" class="header"><a href="#Heinis part" class="justcenter">Heinis part</a></h1></div>
+<blockquote>
+<em>This could be a really good exam question (C) Tomas Heinis</em>
+</blockquote>
+
+<p>
+<span id="Heinis part-How can we make a data structure efficcent for main memory write/read -heavy loads?"></span><strong id="How can we make a data structure efficcent for main memory write/read -heavy loads?">How can we make a data structure efficcent for main memory write/read -heavy loads?</strong>
+Answers are on the Cache-Sensitive Search Tree slides
+</p>
+
+<p>
+ACA is king
+</p>
+
+<p>
+READ the DBMS book
+Chapter 7: Storage
+Chapter 8: Indexes
+Chapter 18: Transactions
+</p>
+
+</body>
+</html>

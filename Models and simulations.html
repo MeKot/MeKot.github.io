@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Models and simulations</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<p>
+<a href="SimMod Revision.html">SimMod Revision</a>
+</p>
+
+<div id="Lecture 1"><h1 id="Lecture 1" class="header"><a href="#Lecture 1" class="justcenter">Lecture 1</a></h1></div>
+<blockquote>
+<em>Missed</em>
+</blockquote>
+<ul>
+<li>
+Utilisation Law
+
+<li>
+Little's Law (Parameters are averages)
+
+<li>
+Response Time Law:
+
+<ul>
+<li>
+Just a variation on little's law
+
+</ul>
+<li>
+The Forced Flow Law
+
+</ul>
+
+<div id="Lecture 2"><h1 id="Lecture 2" class="header"><a href="#Lecture 2" class="justcenter">Lecture 2</a></h1></div>
+<blockquote>
+<em>Let the fun begin</em>
+</blockquote>
+<ul>
+<li>
+The Service Demand/Bottleneck Laws:
+
+<ul>
+<li>
+Service demand on a node is per visit
+
+<li>
+Everything is averages
+
+<li>
+Once you know service Demand, you can calculate a lot of other things
+
+<li>
+Service demand is Dk = Vk Sk
+
+</ul>
+<li>
+The node with the largest demand dictates the throughput (sine it is the bottleneck)
+
+<li>
+The X ≤ min(1/Dmax, N/D+Z) is applicable to max demand (?)
+
+<li>
+D is the minimum you can get (for Response time), R is always greater than or equal to D
+
+<li>
+The rest of the course will focus on modelling the throughput and performance graphs
+
+<li>
+Utilisation of a resource is the proportion of the time the resource is busy (doing useful work):
+
+<ul>
+<li>
+Which is also the probability that the resource is busy
+
+<li>
+Hence, 1 - U is the probability that the resource is idle!
+
+</ul>
+<li>
+What goes in must come out
+
+</ul>
+
+
+<div id="Simulations"><h1 id="Simulations" class="header"><a href="#Simulations" class="justcenter">Simulations</a></h1></div>
+<blockquote>
+<em>Measuring and modelling</em>
+</blockquote>
+
+<ul>
+<li>
+Monte Carlo: aggregate the results of a series of singular experiments using random numbers
+
+<li>
+Discrete Time -- perform n-step random traversal of a state transition system:
+
+<ul>
+<li>
+In this course "discrete" means steps
+
+</ul>
+<li>
+Discrete Event -- as above, but event transitions are triggered by events occurring at
+    discrete points in continuous time
+
+</ul>
+
+
+<div id="Monopoly simulation"><h1 id="Monopoly simulation" class="header"><a href="#Monopoly simulation" class="justcenter">Monopoly simulation</a></h1></div>
+<blockquote>
+<em>Revise stats</em>
+</blockquote>
+
+<ul>
+<li>
+The core idea is to wait until the system stabilises
+
+<li>
+Ensure that the system is not affected by initialisation bias when the measurements are performed
+
+<li>
+Modelling the passage of time
+
+<li>
+Read through some proofs and revise basic stats:
+
+<ul>
+<li class="done0">
+Confidence intervals
+
+<li class="done0">
+T-distribution
+
+<li class="done0">
+
+
+</ul>
+</ul>
+
+<div id="Discrete Event Simulation"><h1 id="Discrete Event Simulation" class="header"><a href="#Discrete Event Simulation" class="justcenter">Discrete Event Simulation</a></h1></div>
+<blockquote>
+<em>A random sample path through a state transition system</em>
+</blockquote>
+
+<p>
+◮ There is a single global “clock” – a virtual time
+◮ Transitions are triggered by events which are placed, a.k.a “scheduled”, in time
+</p>
+<blockquote>
+order on a virtual time line
+</blockquote>
+<p>
+◮ When an event occurs (“fires”, “is triggered”, ...) at virtual time t, say, it:
+</p>
+<blockquote>
+◮ Updates the global clock to t
+◮ Changes the model state
+◮ Schedules zero or more new future events on the time line
+</blockquote>
+<p>
+◮ This implements an asynchronous model of time, c.f. a synchronous model with fixed time steps (∆t)
+</p>
+
+<div id="Discrete Event Simulation-In Practice, however"><h6 id="In Practice, however" class="header"><a href="#Discrete Event Simulation-In Practice, however" class="justcenter">In Practice, however</a></h6></div>
+<p>
+◮ The global clock is a floating-point number, now, say
+◮ The state is a set of discrete program variables, e.g. integers, booleans, arrays thereof etc.
+</p>
+<blockquote>
+i.e. time is continuous, but the state space is discrete
+</blockquote>
+<p>
+◮ The time line is essentially an event diary implemented as a priority queue of
+</p>
+<blockquote>
+(Event, time) pairs, ordered by time
+</blockquote>
+<p>
+◮ Events are implemented as objects, functions, procedures, methods etc.
+◮ A scheduler adds new (Event, time) pairs to the diary
+◮ A descheduler similarly removes them from the diary
+◮ Measurement code will need to be added (Otherwise what is the point of simulating?)
+</p>
+
+<p>
+For Markov Chains it is important to remember that an even scheduled at an
+early stage is <sup><small>inherited</small></sup> at the later stages.
+</p>
+
+<div id="Exponential Distribution and Poisson Processes"><h1 id="Exponential Distribution and Poisson Processes" class="header"><a href="#Exponential Distribution and Poisson Processes" class="justcenter">Exponential Distribution and Poisson Processes</a></h1></div>
+
+<p>
+◮ “Random” arrival processes are ubiquitous in the real world and are often extremely well
+</p>
+<blockquote>
+approximated by so-called Poisson processes
+</blockquote>
+
+<p>
+◮ The distribution is "memoryless", the P of an event is the same no matter how much time has passed
+</p>
+<blockquote>
+since the start
+</blockquote>
+
+<p>
+◮ The 1-p trick has been mentioned enough to be in the exam
+</p>
+
+<p>
+◮ A Poisson arrival process is an arrival “stream” where the inter-arrival times, T, are independent
+</p>
+<blockquote>
+and exponentially-distributed: P(T ≤ t) = 1 − e^(−λt)
+</blockquote>
+
+<p>
+◮ λ is often called the processes’ “rate” parameter and is the reciprocal of the average
+</p>
+<blockquote>
+inter-arrival time
+</blockquote>
+
+
+<p>
+◮ Arrival processes in the real world are often extremely well approximated by Poisson processes
+</p>
+<blockquote>
+because arrivals are typically i. independent ii. ignorant of previous arrivals and the state
+of the system the are arriving at.
+</blockquote>
+
+<p>
+◮ All of the proofs in the notes are "should be able to do them" <sup><small>Exam tim</small></sup>
+</p>
+
+<p>
+◮ If we merge two Poisson processes with rates λ1 and λ2, the merged process is Poisson with rate
+</p>
+<blockquote>
+λ1 + λ2:
+</blockquote>
+
+<p>
+◮ Supplimentary proofs is a good read -- give it a look <sup><small>Task</small></sup>
+</p>
+
+<div id="Distribution Sampling"><h1 id="Distribution Sampling" class="header"><a href="#Distribution Sampling" class="justcenter">Distribution Sampling</a></h1></div>
+
+<p>
+◮ We’ll look at three commonly-used methods:
+</p>
+<ul>
+<li>
+Inverse transform method
+
+<li>
+Acceptance-Rejection (AR) method
+
+<li>
+Convolution method
+
+</ul>
+<p>
+◮ The Inverse transform method:           <sup><small>Revise</small></sup>
+</p>
+<ul>
+<li>
+<code>IF WE CAN INVERT THE FUNCTION</code>
+
+<li>
+We pick a random number between 0, 1
+
+<li>
+Basically equate F to U and solve for x, parameterised with U
+
+<li>
+Careful with constraints with polynomial solutions -- could easily go out of either constraint
+
+</ul>
+<p>
+◮ The Acceptance-rejection method:
+</p>
+<blockquote>
+-
+</blockquote>
+<p>
+◮
+◮
+</p>
+
+<div id="CW Tips"><h1 id="CW Tips" class="header"><a href="#CW Tips" class="justcenter">CW Tips</a></h1></div>
+
+<ul>
+<li>
+As and when we come to the events - we will schedule the next access <code>CW tip</code>
+
+<li>
+The CW could be set up with a data structure with one event for each item
+
+<li>
+The arrival is exponential, hence we can model it with Poisson
+
+<li>
+Each cache item has its own independent arrival stream with the independent rate parameter:
+
+<ul>
+<li>
+Pick the i with that probability
+
+<li>
+Sampling can be done in O(i) with preprocessing
+
+</ul>
+</ul>
+
+</body>
+</html>

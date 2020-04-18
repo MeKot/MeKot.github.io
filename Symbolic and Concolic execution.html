@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Symbolic and Concolic execution</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<div id="Notes on Symbolic and Concolic Execution"><h1 id="Notes on Symbolic and Concolic Execution" class="header"><a href="#Notes on Symbolic and Concolic Execution" class="justcenter">Notes on Symbolic and Concolic Execution</a></h1></div>
+<blockquote>
+<em>JDart and KLEE</em>
+</blockquote>
+
+<ol>
+<li>
+Execution paths of a program can be seen as a binary execution tree:
+
+<ul>
+<li>
+Internal nodes are decision points in the program
+
+<li>
+Leaves are exit points
+
+<li>
+Execution trees of real programs are infinite
+
+<li>
+The leaves of the "current" execution tree form the set of active states
+
+<li>
+Each path from the root to the leaf represents the execution of an equivalent set of inputs
+
+<li>
+The conjunction of constraints gathered is called path condition (or path constraints)
+
+</ul>
+<li>
+Feasible vs Infeasible paths:
+
+<ul>
+<li>
+Some constraints in conjunction can form unsatisfiable conditions
+
+<li>
+Paths associated with such conjunctions are infeasible
+
+</ul>
+<li>
+Finds errors is any "valid" value on the path breaks the code
+
+<li>
+Dynamic Symbolic Execution:
+
+<ul>
+<li>
+Does not require tests cases (automatic)
+
+<li>
+Reaches deep code paths
+
+<li>
+Achieves high statement/branch coverage
+
+<li>
+Can reason about all possible values on the path
+
+<li>
+Finds bugs that depend on the specific values and/or memory layout
+
+<li>
+Finds functional bugs (crosschecking)
+
+<li>
+Generates concrete test cases for explored paths
+
+<li>
+Generates error reports for found bugs
+
+</ul>
+<li>
+Concolic Execution:
+
+<ul>
+<li>
+Mixed Symbolic and Concrete execution
+
+<li>
+Known as directed automatic random testing or whitebox fuzzing
+
+<li>
+All operations that do not depend on symbolic values are executed as in the original code
+
+<li>
+Can have side effects (syscalls, uninstrumented libraries, etc)
+
+<li>
+Only relevant code is executed symbolically
+
+<li>
+Algorithm:
+
+<ol>
+<li>
+Start with a concrete input
+
+<li>
+Run the program on it, collecting PC on the side
+
+<li>
+Choose a PC prefix, negate last constraint
+
+<li>
+Solve the new PC to obtain the new input
+
+</ol>
+</ul>
+<li>
+Levels of instrumentation:
+<table class='center'>
+<tr>
+<th>
+Advantages
+</th>
+<th>
+Source
+</th>
+<th>
+Binary
+</th>
+</tr>
+<tr>
+<th>
+Source access
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Yes
+</th>
+</tr>
+<tr>
+<th>
+Recompiling
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Yes
+</th>
+</tr>
+<tr>
+<th>
+Ease of instrumentation
+</th>
+<th>
+Yes
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<th>
+Information available
+</th>
+<th>
+Yes
+</th>
+<th>
+Yes
+</th>
+</tr>
+</table>
+
+<li>
+Static vs Dynamic instrumentation:
+
+<ul>
+<li>
+Static - change code before it is run, generate new binary, run it
+
+<li>
+Dynamic - instrument the program as it runs, like an interpreter
+
+<li>
+Comparison table
+<table class='center'>
+<tr>
+<th>
+Advantages
+</th>
+<th>
+Static
+</th>
+<th>
+Dynamic
+</th>
+</tr>
+<tr>
+<th>
+Tracking dependencies
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Yes
+</th>
+</tr>
+<tr>
+<th>
+Relinking
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Yes
+</th>
+</tr>
+<tr>
+<th>
+Dynamically changing instrumentation
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Yes
+</th>
+</tr>
+<tr>
+<th>
+Self-modifying code
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Yes
+</th>
+</tr>
+<tr>
+<th>
+Performance
+</th>
+<th>
+Yes
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<th>
+Ease of implementation
+</th>
+<th>
+Yes
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+</table>
+
+</ul>
+<li>
+EXE:
+
+<ul>
+<li>
+Static instrumentation at the source-level
+
+</ul>
+<li>
+KLEE:
+
+<ul>
+<li>
+Dynamic instrumentation at the intermediate level
+
+<li>
+Works as a mixed concrete/symbolic interpreter for LLVM bitcode
+
+<li>
+Uses multiple search heuristics in a round-robin fashion
+
+</ul>
+<li>
+Path exploration:
+
+<ul>
+<li>
+Exploring the most important paths first is essential
+
+<li>
+Search heuristics:
+
+<ol>
+<li>
+DFS
+
+<li>
+BFS
+
+<li>
+Coverage-base heuristic:
+
+<ul>
+<li>
+EXE:
+
+<ol>
+<li>
+Pick the process that is at the line that has been run the fewest
+
+<li>
+Run it in DFS for a while
+
+<li>
+Iterate
+
+</ol>
+<li>
+KLEE:
+
+<ol>
+<li>
+MD2U = minimum distance from state x to an uncovered instruction
+
+<li>
+States are selected non-uniformly with weight 1/MD2U^{2}
+
+</ol>
+</ul>
+<li>
+Random:
+
+<ul>
+<li>
+Subtrees have equal probability of being selected whatever their size is
+
+<li>
+NOT random state selection
+
+<li>
+Favours paths high in the tree (fewer constraints)
+
+<li>
+Loops could cause starvation
+
+</ul>
+</ol>
+<li>
+Elimination redundant paths:
+
+<ol>
+<li>
+If two paths reach the same point with the same constraint sets, we
+          can prune one of them
+
+<li>
+We can discard from constraint sets those constraints involving
+          memory that is never read again
+
+<li>
+Biggest improvement in branch coverage
+
+</ol>
+<li>
+Statically merging paths:
+
+<ol>
+<li>
+Path merging == outsourcing the problem to the constraint solver
+
+<li>
+Removes unnecessary conditionals:
+         <em>if (a &gt; b) {</em>
+            <em>max = a;</em>
+         <em>} else {</em>                becomes       <em>max = select(a&gt;b, a, b);</em>
+            <em>max = b;</em>
+        <em>}</em>
+
+</ol>
+<li>
+Using existing regression testing suites:
+
+<ul>
+<li>
+Pros:
+
+<ul>
+<li>
+Designed to execute interesting behaviour
+
+<li>
+Often achieve good coverage of different program features
+
+</ul>
+<li>
+Cons:
+
+<ul>
+<li>
+Execute each path with a single set of inputs
+
+<li>
+Often exercise the general case, missing edge cases
+
+</ul>
+<li>
+ZESTI:
+
+<ul>
+<li>
+Use the paths executed by the regression suite to bootstrap exploration:
+
+<ul>
+<li>
+Benefits from the coverage of the manual test suite
+
+<li>
+Finds additional errors on these paths
+
+</ul>
+<li>
+Incrementally explore paths around dangerous operations in
+              increasing distance from them:
+
+<ul>
+<li>
+Tests all possible corner cases for the features tested by the test suite
+
+</ul>
+<li>
+No need to construct test drivers (existing tests drive input generation)
+
+</ul>
+</ul>
+</ul>
+<li>
+Constraint solving challenges: (STP is used as an example)
+
+<ul>
+<li>
+Accuracy:
+
+<ul>
+<li>
+Bit-level modelling of memory
+
+<li>
+Many errors are related by corner cases on pointer/integer casting and overflows
+
+<li>
+STP models each memory block as an array of 8-bit bitvectors
+
+<li>
+STP binds types to expressions, not to bits
+
+</ul>
+<li>
+Performance:
+
+<ul>
+<li>
+Real programs generate many expensive constraints
+
+<li>
+Solver must be invoked at every branch
+
+<li>
+Computation is expensive (NP-complete)
+
+</ul>
+</ul>
+<li>
+Constraint solving optimisations:
+
+<ul>
+<li>
+Simplifying and normalising constraints
+
+<li>
+Elimination of irrelevant constraints:
+
+<ul>
+<li>
+Remove all constraints that do not contain the variables used to evaluate the branch
+
+</ul>
+<li>
+Caching constraints:
+
+<ul>
+<li>
+Cache outputs for inputs of constraints and return known output for the seen input
+
+</ul>
+<li>
+Exploiting subset/superset relations:
+
+<ul>
+<li>
+Match cached constraints with the sub/supersets that do not invalidate solutions
+
+</ul>
+<li>
+Accelerating array constraints:
+
+<ul>
+<li>
+Dynamic constant folding on array reads -- pins every element to a constant value
+
+<li>
+Index-based transformation -- remove reads completely and only compare indices
+
+<li>
+Value-based transformation -- replaces array reads with unique value
+          guarded by range checks
+
+</ul>
+<li>
+Environment problem:
+
+<ul>
+<li>
+Choose concrete parameters and call the environment:
+
+<ol>
+<li>
+Paths missing
+
+<li>
+potential interaction between paths (side effects)
+
+</ol>
+<li>
+Make results from environment unconstrained:
+
+<ol>
+<li>
+Infeasible paths
+
+</ol>
+<li>
+Symbolic environment:
+
+<ol>
+<li>
+Provide a symbolic file system
+
+<li>
+Vitalises access to native resources among states
+
+<li>
+Provides symbolic arguments, files with symbolic contents, etc
+
+<li>
+Has to be implemented at the OS level (because of the syscalls)
+
+</ol>
+</ul>
+</ul>
+<li>
+Testing:
+
+<ul>
+<li>
+Semantics-Preserving Evolution via Crosschecking:
+
+<ul>
+<li>
+Compare optimised vs non-optimised versions
+
+<li>
+Can find semantic errors
+
+<li>
+Crosschecking queries can be solved faster
+
+</ul>
+</ul>
+<li>
+SIMDs:
+
+<ul>
+<li>
+Tame path explosion by statically merging paths
+
+<li>
+Crosschecking queries can be syntactically proved to be equivalent using simple rewrite rules
+
+</ul>
+<li>
+Summary:
+    • Automatic, does not require test cases
+    • Highly systematic
+        – reaches deep code paths
+        – achieves high statement/branch coverage
+        – can reason about all possible values on a path
+    • Finds deep bugs
+        – including those depending on specific values and/or memory layout
+        – including functional bugs (e.g. via crosschecking)
+        – generates inputs that hit the bugs found
+    • Scalability challenges
+        – Path exploration
+        – Constraint solving
+
+</ol>
+
+</body>
+</html>

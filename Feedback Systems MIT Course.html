@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Feedback Systems MIT Course</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Feedback Systems"><h1 id="Feedback Systems" class="header"><a href="#Feedback Systems" class="justcenter">Feedback Systems</a></h1></div>
+
+<p>
+The course concentrates on classical Feedback with elements of modern Control theory.
+</p>
+
+<p>
+A control systems is a system that regulates an output variable with the objective of producing a
+given relationship between in and an input variable, or of maintaining the output at a fixed value.
+In a feedback control system, at least part of the informations used to change the output variable
+is derived from measurements performed on the output variable itself. This is knows as closed-loop
+control and is often preferred to the open-loop control systems (where the output-variable is not
+used to influence the system). Closed-loop systems that use feedback have lower sensitivity to
+externally applied disturbances and changes in system parameters.
+</p>
+
+<p>
+The principal advantage of feedback is a reduction in sensitivity of the system to changes in gain
+of certain elements. This reduction in sensitivity is obtained only in exchange for an increase in
+the magnitude of the gain of one or more of the elements in the system. In some cases it is also
+possible to reduce the effects of disturbances applied to the system. However, this could be
+achieved without a feedback solution (though feedback is almost always a better practical choice).
+</p>
+
+<p>
+Because feedback reduces the sensitivity of the system to changes in open-loop gain, it can often
+moderate the effects of nonlinearities. The performance of the system can be determined by
+recognising that, since the nonlinear element is piecewise linear, all transfer relationships must
+be piecewise linear.
+</p>
+
+<p>
+Feedback provides a mechanism to reduce the sensitivity of the system to certain kinds of
+disturbances. Three different sources of disturbances are applied to the system below. The
+disturbance <em>V</em><sub><small>d1</small></sub> enters the system at the same point as the system input, and might represent
+the noise associated with he input stage of an amplifier. Disturbance <em>V</em><sub><small>d2</small></sub> enters the system at
+an intermediate point, and might represent the changing load characteristics.
+</p>
+
+<p>
+<img src="../../vimwiki/img/control_disturbances_diagram.png" />
+</p>
+
+<p>
+Therefore, we can derive the dependency between the output voltage, input and disturbances is as
+follows:
+</p>
+
+<p>
+<img src="../../vimwiki/img/output_vs_input_and_disturbances_formula.png" />
+</p>
+
+<p>
+As could be seen from equation above, the disturbance <em>V</em><sub><small>d1</small></sub> is not attenuated relative to the
+input signal. This, of course, is expected since <em>V</em><sub><small>i</small></sub> and <em>V</em><sub><small>d1</small></sub> enter the system at the same
+point. Furthermore, this reflects the fact that feedback cannot improve quantities such as the noise
+figure of an amplifier.
+</p>
+
+<p>
+<span id="Feedback Systems-How does this relate to the application of closed-loop control to a distributed system?"></span><strong id="How does this relate to the application of closed-loop control to a distributed system?">How does this relate to the application of closed-loop control to a distributed system?</strong>
+</p>
+
+
+<p>
+The disturbances that enter the amplifier at other points are attenuated relative to the input
+signal by amounts equal to the forward-path gains between the input and the points where the
+disturbances are applied.
+</p>
+
+</body>
+</html>

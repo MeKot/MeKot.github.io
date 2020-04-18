@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>RAII</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Resource Acquisition Is Initialisation"><h1 id="Resource Acquisition Is Initialisation" class="header"><a href="#Resource Acquisition Is Initialisation" class="justcenter">Resource Acquisition Is Initialisation</a></h1></div>
+<blockquote>
+<em>The dark side of CPP</em>
+</blockquote>
+
+<ol>
+<li>
+Reference vs pointer in cpp:
+
+<ul>
+<li>
+Reference:
+
+<ul>
+<li>
+Alias for an already existing variable
+
+<li>
+Stores the address of the object that it aliases
+
+<li>
+A reference is a "fixed" pointer to a specific address
+
+<li>
+The compiler will apply dereferencing (*) for you
+
+<li>
+<span id="Resource Acquisition Is Initialisation-Cannot be reassigned"></span><strong id="Cannot be reassigned">Cannot be reassigned</strong>
+
+<li>
+<span id="Resource Acquisition Is Initialisation-Cannot be NULL"></span><strong id="Cannot be NULL">Cannot be NULL</strong>, but can be invalid
+
+<li>
+One level of indirection (only reference to a value, not reference to reference)
+
+<li>
+<sup><small>Used in function parameters and return types</small></sup>:
+
+<ol>
+<li>
+To modify a local variable of the outer scope (borrowing)
+
+</ol>
+<li>
+Created with
+            <code>int i = 4;</code>
+            <code>int&amp; ref = i;</code>
+
+</ul>
+<li>
+Pointer:
+
+<ul>
+<li>
+Variable that holds a memory address
+
+<li>
+Needs to be dereferenced when accessing the value
+
+<li>
+Can be reassigned
+
+<li>
+Can be NULL
+
+<li>
+Any number of levels of indirection
+
+<li>
+Created with
+            <code>int i = 4;</code>
+            <code>int* ref = &amp;i;</code>
+
+</ul>
+</ul>
+<li>
+RAII:
+
+<ul>
+<li>
+Use <code>unique_ptr&lt;&gt;</code> to automatically call destructors on the heal-allocated objects
+
+<li>
+Use <code>shared_ptr&lt;&gt;</code> to automatically manage shared pointers:
+
+<ol>
+<li>
+Cleaned up when the last copy goes out of scope
+
+</ol>
+<li>
+The constructor acquires a resource, the destructor releases the resource (<span id="Resource Acquisition Is Initialisation-always"></span><strong id="always">always</strong>)
+
+</ul>
+</ol>
+
+</body>
+</html>

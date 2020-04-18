@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Safe C Compilers</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="SafeC Compilers"><h1 id="SafeC Compilers" class="header"><a href="#SafeC Compilers" class="justcenter">SafeC Compilers</a></h1></div>
+
+<ol>
+<li>
+Buffer Overflows:
+
+<ul>
+<li>
+Instrument the program with dynamic buffer overflow checks
+
+<li>
+Fat Pointers:
+
+<ul>
+<li>
+Store the start and end address in the pointer (extend pointers)
+
+<li>
+Increase pointer size
+
+<li>
+Pointers do not fit in the registers
+
+<li>
+Looses bounds when pointers are converted to integers and back
+
+<li>
+<span id="SafeC Compilers-Not backwards compatible with existing code"></span><strong id="Not backwards compatible with existing code">Not backwards compatible with existing code</strong>
+
+</ul>
+<li>
+Jones and Kelly Compiler:
+
+<ul>
+<li>
+Does not change the pointer representation
+
+<li>
+Keep the end address of the pointer in a table and validate pointers based on that
+
+<li>
+Pointers validated at dereferencing
+
+<li>
+Object table functionality is implemented with <a href="Splay Trees.html">Splay Trees</a>
+
+<li>
+Flaws:
+
+<ul>
+<li>
+Pointer to integer conversion looses the checks
+
+<li>
+One past the end of the array (in C it is legal to have a pointer to that)
+
+</ul>
+</ul>
+<li>
+CRED Compiler:
+
+<ul>
+<li>
+Allows OOB pointers for better compatibility with existing code
+
+<li>
+Evaluates each pointer individually (no valid pointer is marked as invalid)
+
+</ul>
+<li>
+Boundless Memory Blocks Compiler:
+
+<ul>
+<li>
+User a SafeC compiler to detect all OOB accesses
+
+<li>
+Store OOB writes in a hash table
+
+<li>
+Conceptually give each allocated memory block its own address space and unbounded size
+
+<li>
+Extend memory by spacing out each allocated block with a writable buffer
+
+<li>
+Issues:
+
+<ol>
+<li>
+Possible DOS attack (large number of writes)
+
+<li>
+Mitigated by treating the hash tables as a fixed-size cache
+
+</ol>
+<li>
+Evaluation:
+
+<ol>
+<li>
+Developers are more likely to incorrectly calculate the size of a buffer
+
+<li>
+Developers are likely to omit the bounds check
+
+<li>
+Cache misses and uninitialised reads are rare
+
+<li>
+Conceptually unbounded memory blocks mitigate most of the security vulnerabilities
+
+</ol>
+</ul>
+</ul>
+<li>
+Summary:
+
+<ol>
+<li>
+In most cases overhead of ~25% is impractical to use in production
+
+<li>
+Could be used for offline testing, but <a href="Compiler sanitisers.html">Compiler sanitisers</a> tend to perform better
+
+</ol>
+</ol>
+
+</body>
+</html>

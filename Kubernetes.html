@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Kubernetes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Kube Paper"><h1 id="Kube Paper" class="header"><a href="#Kube Paper" class="justcenter">Kube Paper</a></h1></div>
+
+<div id="Kube Paper-Dictionary"><h2 id="Dictionary" class="header"><a href="#Kube Paper-Dictionary" class="justcenter">Dictionary</a></h2></div>
+
+<ol>
+<li>
+Nodes - Machines that host containers in the k8s cluster (alt <code>minions</code>)
+
+<li>
+Masters - Machines that run coordinating software that schedules containers on Nodes
+
+<li>
+Cluster - A collection of masters and nodes
+
+<li>
+Pods - Collections of containers and volumes that are bundled and scheduled together because they
+   share a common resource
+
+<li>
+Shared Fate - if one container in a pod dies, they all die
+
+<li>
+Labels - a key/value pair that is assigned to a k8s object to uniquely identify it
+
+<li>
+Annotations - useful information about a k8s object
+
+<li>
+Replicas - multiple copies of a pod
+
+</ol>
+
+
+<div id="Notes on basic building blocks"><h1 id="Notes on basic building blocks" class="header"><a href="#Notes on basic building blocks" class="justcenter">Notes on basic building blocks</a></h1></div>
+<ol>
+<li>
+The Facts:
+
+<ul>
+<li>
+Containers are lightweight -&gt; flexible and fast
+
+<li>
+Designed to be short-lived and fragile
+
+<li>
+VMs are like passenger jets - super resilient and have the swing of the entire OS behind them
+
+<li>
+Containers are like the Lunar Module - light, heavily optimised and designed to work in very
+      specific and orchestrated conditions
+
+</ul>
+<li>
+The Problem:
+
+<ul>
+<li>
+Distribution of containers across machines (to minimise the effect of a single machine
+      failure)
+
+<li>
+Detection of container failure and immediate replacement
+
+<li>
+Running containers in managed clusters and heavily orchestrating them
+
+<li>
+Management of overall network and memory resources for the cluster
+
+</ul>
+<li>
+Pillars:
+
+<ol>
+<li>
+Isolation - a failure of one computing unit cannot take down another
+
+<li>
+Orchestration - resources should be well-balanced geographically (load distribution)
+
+<li>
+Scheduling - detection of failures and their replacement should be near instant
+
+</ol>
+<li>
+Applications vs Services:
+
+<ul>
+<li>
+Service:
+
+<ul>
+<li>
+Designed to do a small number of things
+
+<li>
+Has no UI and in invoked solely via some kind of API
+
+<li>
+When designing, try to make the services as light and limited purpose (aids rearranging
+          them later in response to the changes in the load)
+
+</ul>
+<li>
+Application:
+
+<ul>
+<li>
+Has a UI (even if it is a CLI)
+
+<li>
+Performs a number of different tasks
+
+<li>
+Can possibly expose an API (but doesn't have to)
+
+</ul>
+</ul>
+<li>
+Masters:
+
+<ul>
+<li>
+API Server:
+
+<ul>
+<li>
+Handles API calls from nearly all components of the master or the nodes
+
+</ul>
+<li>
+Etcd:
+
+<ul>
+<li>
+Service
+
+<li>
+Keeps and replicates the current configuration and run state of the cluster
+
+<li>
+Lightweight distributed key-value store
+
+<li>
+Originally developed in Core OS project
+
+</ul>
+<li>
+Scheduler and Controller Manager:
+
+<ul>
+<li>
+Schedule pods onto target nodes
+
+<li>
+Ensure that a correct number of them are running at any given point in time
+
+</ul>
+</ul>
+<li>
+Nodes:
+
+<ul>
+<li>
+Kubelet:
+
+<ul>
+<li>
+Daemon that runs on each node
+
+<li>
+Responds to commands from the master to create, destroy and monitor the containers
+
+</ul>
+<li>
+Proxy:
+
+<ul>
+<li>
+Simple proxy
+
+<li>
+Separates the IP address of the target container from the name of the service it provides
+
+</ul>
+<li>
+cAdvisor:
+
+<ul>
+<li>
+Optional
+
+<li>
+Daemon that runs on a node
+
+<li>
+Collects, aggregates, processes and exports information about running containers
+
+<li>
+I.E: Resource isolation, historical usage and key network stats
+
+</ul>
+</ul>
+<li>
+Pods:
+
+<ul>
+<li>
+In Docker every container get its own IP address
+
+<li>
+In k8s a shared IP is assigned to the pod
+
+<li>
+Containers on the same pod can communicate with one another using <code>localhost</code>
+
+<li>
+<sup><small>Scheduling happens at the pod level, no the container level</small></sup>
+
+</ul>
+<li>
+Reasons to put services in a pod but not in a single container:
+
+<ul>
+<li>
+Management Transparency:
+
+<ul>
+<li>
+You assume responsibility for monitoring and managing how much resource each service in
+          the container uses
+
+<li>
+If one rogue process starves others it will up to you to detect and fix that
+
+<li>
+K8s can manage it for you if the services are split into multiple containers in the same
+          pod
+
+</ul>
+<li>
+Deployment and Maintenance:
+
+<ul>
+<li>
+Individual containers can be rebuild and redeployed whenever needed
+
+<li>
+Decoupling of deployments allows for faster iteration and testing
+
+<li>
+Simplifies rollbacks
+
+</ul>
+<li>
+Focus:
+
+<ul>
+<li>
+If k8s is handling all the monitoring an resource management the containers can be lighter
+          and only contain the business logic
+
+</ul>
+</ul>
+<li>
+Lack of Durability:
+
+<ul>
+<li>
+Pods are not durable
+
+<li>
+From time to time the master may choose to evict the pod from its host
+
+<li>
+Pod eviction - kill it and raise a new one somewhere else
+
+<li>
+Preservation of the application state is on the developer (<sup><small>you</small></sup>)
+
+<li>
+Use a shared data store like Redis, Memcached or Cassandra
+
+</ul>
+<li>
+Volumes:
+
+<ul>
+<li>
+Docker volume - a virtual FS that the container can see and use
+
+<li>
+K8s volumes are defined at the pod level, which solves the following problems:
+
+<ul>
+<li>
+Durability:
+
+<ol>
+<li>
+Containers die and reborn all the time
+
+<li>
+A volume tied to a container will die with it, along with any data written to it
+
+</ol>
+<li>
+Communication:
+
+<ol>
+<li>
+Any container at the pod has access to the volume
+
+<li>
+Easy to move temporary data across containers
+
+</ol>
+</ul>
+<li>
+Its important to be clear what kind of volume is in question (a container volume or a pod one)
+
+</ul>
+<li>
+Volume Types:
+
+<ul>
+<li>
+<code>EmptyDir</code>:
+
+<ul>
+<li>
+Most commonly used
+
+<li>
+Bound to the pod and is initially always empty when first created
+
+<li>
+Exists for the life of the pod
+
+<li>
+When the pod is evicted, the volume is destroyed and all data is lost
+
+<li>
+For the life of the pod, every container on it can read and write data to the volume
+
+<li>
+<sup><small>Ephemeral</small></sup> volume
+
+</ul>
+<li>
+NFS:
+
+<ul>
+<li>
+Mounting NFS volume at the pod level
+
+<li>
+<sup><small>Persistent</small></sup> volume
+
+</ul>
+<li>
+GCEPersistentDisk:
+
+<ul>
+<li>
+Google Cloud persistent disk that can be mounted as a volume on a pod
+
+<li>
+PD is like a managed NFS service
+
+</ul>
+</ul>
+</ol>
+
+<div id="Notes on Cluster creation"><h1 id="Notes on Cluster creation" class="header"><a href="#Notes on Cluster creation" class="justcenter">Notes on Cluster creation</a></h1></div>
+
+
+<ol>
+<li>
+K8s provides basic ways to annotate and document the infrastructure:
+
+<ul>
+<li>
+Labels:
+
+<ul>
+<li>
+Decorates a pod and is a part of the <code>pod.yaml</code> file
+
+<li>
+Keys are a combination of 0 or more prefixes followed by a "/"
+            E.G: "application.game/tier" vs "tier"
+
+<li>
+Labels must conform to the rules of DNS entries (DNS Labels)
+
+<li>
+Prefixes are one or more DNS Labels separated by the "." character
+
+<li>
+Max size for prefix is 253 characters
+
+<li>
+Values follow the same rules but cannot be longer than 63 characters
+
+<li>
+<sup><small>Neither keys nor values can contain spaces</small></sup>
+
+<li>
+-- Is there a way to statically check your labels to avoid missed routes? --
+
+</ul>
+<li>
+Label Selectors:
+
+<ul>
+<li>
+Central means of rooting and orchestration
+
+<li>
+Equality-based label selectors:
+
+<ol>
+<li>
+Exact match
+
+<li>
+Can be combined like so
+              tier != frontend, game = super-shooter-2
+
+</ol>
+<li>
+Set-based:
+
+<ol>
+<li>
+"In/Not in" kind of query
+
+<li>
+Checks the label against a set of acceptable values
+
+<li>
+Can be combined like so
+              environment in (production, test), tier notin (frontend, back-end), partition
+
+</ol>
+</ul>
+<li>
+Annotations:
+
+<ul>
+<li>
+Can be queried against
+
+<li>
+Key/value pairs and have the same rules as Labels
+
+<li>
+Information stored on it is something like build date or a URL to more information
+
+<li>
+Annotations are used to store arbitrary information about a thing that you <code>might</code> want to
+          query against
+
+</ul>
+</ul>
+<li>
+Replication Controllers:
+
+<ul>
+<li>
+Replicas exist to provide scale and fault-tolerance to the cluster
+
+<li>
+Replication Controller ensures that a correct number of replicas is running at all times
+
+<li>
+Therefore it is a component that focuses on availability of the services in the pods
+
+<li>
+The controller will create and destroy replicas as it needs to
+
+<li>
+Controller operates following a set of rules defined in a <sup><small>pod template</small></sup>
+
+<li>
+<span id="Notes on Cluster creation-Pod template:"></span><strong id="Pod template:">Pod template:</strong>
+
+<ul>
+<li>
+Definition of the desired state of the cluster
+
+<li>
+Specifies which images are to be used to create each pod
+
+<li>
+Specifies how many replicas should exist
+
+</ul>
+</ul>
+<li>
+Replication scheme in k8s is loosely coupled:
+
+<ul>
+<li>
+Replication controller operates (and identifies pods) using a label selector
+
+<li>
+If the controller is killed, then replicas managed by it are unaffected
+
+<li>
+Benefits of such loose coupling:
+
+<ul>
+<li>
+Removing a pod for debugging is as simple as changing the label
+
+<li>
+Changing the label selector changes which replicas are controlled in real time
+
+<li>
+Controllers can be swapped and pods will be unaffected by the change
+
+</ul>
+<li>
+<span id="Notes on Cluster creation-TIP: Account for possible failures in replication controllers as well!"></span><strong id="TIP: Account for possible failures in replication controllers as well!">TIP: Account for possible failures in replication controllers as well!</strong>
+
+<ul>
+<li>
+Run at least two controllers to avoid having a single point of failure
+
+</ul>
+</ul>
+<li>
+On Scheduling and Scaling:
+    -
+
+</ol>
+
+</body>
+</html>

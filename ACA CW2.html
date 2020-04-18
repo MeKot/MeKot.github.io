@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>ACA CW2</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Analysis"><h1 id="Analysis" class="header"><a href="#Analysis" class="justcenter">Analysis</a></h1></div>
+
+
+<p>
+These bad boys were introduced by the SSE2 instruction set
+</p>
+
+<p>
+<em>Notes on SSE Intrinsics in general</em>
+</p>
+
+<p>
+Data types:
+</p>
+
+<p>
+__m128 f; // = {float f0, f1, f2, f3}
+__m128d d; // = {double d0, d1}
+__m128i i; // 16 8-bit, 8-16 bit, 4 32-bit or 2-64 bit ints
+</p>
+
+<p>
+<em>mm</em>&lt;intrin_op&gt;_&lt;suffix&gt; --
+</p>
+
+<p>
+Suffixes: p -- packed; s -- single;
+</p>
+
+
+<ol>
+<li>
+RDTSCP -- timestamp counter for 64 bit architectures
+
+<li>
+MFENCE -- memory fencing, which serialises all load/store operations that
+   were issued prior to the call to _mm_mfence()
+
+<li>
+CLFLUSH -- Flush cache line
+   If missing the cache is flushed with writing to this array
+   uint8_t cache_flush_array[CACHE_FLUSH_STRIDE * CACHE_FLUSH_ITERATIONS];
+                                <sup><small>2048</small></sup>                <sup><small>4096</small></sup>
+
+</ol>
+<p>
+4.
+</p>
+
+
+
+<div id="What the code does"><h1 id="What the code does" class="header"><a href="#What the code does" class="justcenter">What the code does</a></h1></div>
+
+<ul>
+<li>
+Sets cache_hit_threshold to 120
+
+<li>
+malicious_x is the secret string address, calculated by
+  <code>secret - (char*) array1</code> = 131152 which is the distance from array1 to secret
+  <sup><small>(char*)</small></sup>    <sup><small>(uint8_t*)</small></sup>
+
+</ul>
+
+<p>
+  WHY?
+</p>
+
+<table>
+<tr>
+<th>
+Memory Structure
+</th>
+<th>
+Contents
+</th>
+<th>
+Relative address in bytes
+</th>
+</tr>
+<tr>
+<th>
+int array1_size
+</th>
+<th>
+Contains 16
+</th>
+<th>
+0
+</th>
+</tr>
+<tr>
+<th>
+uint8_t unused1[64]
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+4
+</th>
+</tr>
+<tr>
+<th>
+uint8_t array1[16]
+</th>
+<th>
+Contains ints 1-16
+</th>
+<th>
+68
+</th>
+</tr>
+<tr>
+<th>
+uint8_t unused2[64]
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+84
+</th>
+</tr>
+<tr>
+<th>
+uint8_t array2[256 * 512]
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+148
+</th>
+</tr>
+<tr>
+<th>
+char* secret
+</th>
+<th>
+Contains the secret
+</th>
+<th>
+131220
+</th>
+</tr>
+<tr>
+<th>
+uint8_t temp
+</th>
+<th>
+Contains 0
+</th>
+<th>
+131220 + secret length
+</th>
+</tr>
+</table>
+
+
+
+<p>
+Experiment results
+</p>
+
+<p>
+Initially we changed the ration between the leading suggestion and second best
+guess from 2 to 1.5. This improved performnace from ~3.5-4s to ~1second on
+default threshold. After that we decided to check how changing threshold
+affects runtime and discovered the following data for our runs <a href="20_30.html">20_30</a>
+</p>
+
+</body>
+</html>

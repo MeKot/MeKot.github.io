@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>CppCon 2015: Bjarne Stroustrup “Writing Good C++14”</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Writing good C++14"><h1 id="Writing good C++14" class="header"><a href="#Writing good C++14" class="justcenter">Writing good C++14</a></h1></div>
+<blockquote>
+<em>Within C++ there is a smaller, simpler and safer language waiting to get out</em>
+</blockquote>
+
+<ol>
+<li>
+Initial work on making CPP better:
+
+<ul>
+<li>
+Core guidelines for CPP
+
+<li>
+Guidelines support library
+
+<li>
+Analysis tool by Microsoft (<a href="https://docs.microsoft.com/en-us/cpp/code-quality/code-analysis-for-c-cpp-overview?view=vs-2019)">https://docs.microsoft.com/en-us/cpp/code-quality/code-analysis-for-c-cpp-overview?view=vs-2019)</a>
+
+</ul>
+<li>
+Additional talks:
+
+<ul>
+<li>
+<a href="CppCon 2015: Herb Sutter &quot;Writing Good C++14... By Default&quot;.html">CppCon 2015: Herb Sutter "Writing Good C++14... By Default"</a>
+
+<li>
+Some more (maybe later)
+
+</ul>
+<li>
+A set of guidelines to write CPP with:
+
+<ol>
+<li>
+High-level rules:
+
+<ul>
+<li>
+Express ideas directly in code (compilers don't write comments)
+
+<li>
+Write ISO Standard C++ (<a href="https://isocpp.org/std/the-standard)">https://isocpp.org/std/the-standard)</a>
+
+<li>
+Express intent
+
+<li>
+Ideally a program should be statically type-safe
+
+<li>
+Prefer compile-time checking to runtime checking
+
+<li>
+What cannot be checked at compile time should be checked at runtime
+
+<li>
+Catch runtime errors as early as possible
+
+<li>
+Don't leak any resources
+
+<li>
+Don't waste time or space
+
+</ul>
+<li>
+Low-level rules:
+
+<ul>
+<li>
+Used primarily in tooling
+
+<li>
+Derived from standards
+
+<li>
+Help to unify style
+
+<li>
+Not minimal or orthogonal
+
+</ul>
+<li>
+Guidelines Support Library
+
+</ol>
+<li>
+Solving dangling pointers:
+
+<ul>
+<li>
+Distinguish between owners and non-owners
+
+<li>
+Assume raw pointers to be non-owners
+
+<li>
+Every object has an owner (<a href="RAII.html">RAII</a>), use smart pointers
+
+<li>
+Use GSL owner&lt;T&gt; construct (which is just an alias for T*) <span id="Writing good C++14-only for naked pointers!!!"></span><strong id="only for naked pointers!!!">only for naked pointers!!!</strong>
+
+</ul>
+<li>
+The owners need to disappear into abstractions
+
+</ol>
+
+</body>
+</html>

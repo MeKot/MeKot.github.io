@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>CPP</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<p>
+<a href="CppCon 2017: Bjarne Stroustrup “Learning and Teaching Modern C++”.html">CppCon 2017: Bjarne Stroustrup “Learning and Teaching Modern C++”</a>
+</p>
+
+<p>
+<a href="CppCon 2015: Bjarne Stroustrup “Writing Good C++14”.html">CppCon 2015: Bjarne Stroustrup “Writing Good C++14”</a>
+</p>
+
+<div id="Plan"><h1 id="Plan" class="header"><a href="#Plan" class="justcenter">Plan</a></h1></div>
+
+<ol>
+<li>
+A few classes (Linked List, Min/Max Heap, Sorting)
+
+<li>
+A simple system
+
+</ol>
+
+<p>
+<a href="RAII.html">RAII</a>
+</p>
+
+
+<div id="Optimising code"><h1 id="Optimising code" class="header"><a href="#Optimising code" class="justcenter">Optimising code</a></h1></div>
+
+<ol>
+<li>
+One memory reference costs about 100 nanoseconds
+   (<a href="https://colin-scott.github.io/personal_website/research/interactive_latency.html):">https://colin-scott.github.io/personal_website/research/interactive_latency.html):</a>
+
+<ul>
+<li>
+Recalculating values can be faster than keeping them in memory
+
+<li>
+Compilers rely on SSA (static single assignment):
+
+<ul>
+<li>
+Each variable is assigned exactly once
+
+<li>
+Every variable is defined before it is used
+
+</ul>
+</ul>
+<li>
+Steps:
+
+<ol>
+<li>
+Cleanup:
+
+<ul>
+<li>
+Compiler removes unnecessary memory allocations
+
+<li>
+Compiler keeps as many variables as possible on the stack
+
+</ul>
+<li>
+Canonicalization:
+
+<ul>
+<li>
+Compiler rewrites control flow to be in a canonical way.
+
+<li>
+Every loop becomes a canonical LLVM loop, and so do if-then-else statements
+
+</ul>
+<li>
+Abstraction collapsing:
+
+<ul>
+<li>
+Functions, calls and the call graph:
+
+<ul>
+<li>
+Partitioning call graph on clusters of fucntions
+
+<li>
+Leaves are then natural candidates for inlining -&gt; repeated for new leaves
+
+<li>
+Keep in mind things like partial inlining and call graph shuffling
+
+<li>
+Inlining can produce significant optimisations, but can be hard for compiler to get
+
+<li>
+<a href="Function inlining.html">Function inlining</a>
+        -
+
+</ul>
+</ul>
+</ol>
+</ol>
+
+</body>
+</html>

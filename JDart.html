@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>JDart</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Notes"><h1 id="Notes" class="header"><a href="#Notes" class="justcenter">Notes</a></h1></div>
+<blockquote>
+<em>All hope abandon ye who enter here</em>
+</blockquote>
+
+<ol>
+<li>
+Consists of the explorer and the executor 
+
+<ol>
+<li>
+The explorer determines the exploration strategy (order of traversal) 
+
+<ol>
+<li>
+Organises recorded (by executor) path into a constraints tree
+
+<li>
+Decides which paths to explore next and when to stop exploration
+
+<li>
+Currently uses JConstraints (layer of abstraction for symbolic paths constraints and 
+         an interface to the existing constraint solvers)
+
+<li>
+ Solvers supported: 
+
+<ol>
+<li>
+Coral -- supports trigonometric constraints
+
+<li>
+SMTInterpol
+
+<li>
+Z3    -- Trig is approximated, floats are approximated by reals 
+
+</ol>
+</ol>
+</ol>
+</ol>
+<blockquote>
+<span id="Notes-SMT solvers provide decision procedures for first-order logical formulas of"></span><strong id="SMT solvers provide decision procedures for first-order logical formulas of">SMT solvers provide decision procedures for first-order logical formulas of</strong>
+<span id="Notes-from different theories (integer numbers, bit vectors, arrays..) Given a set"></span><strong id="from different theories (integer numbers, bit vectors, arrays..) Given a set">from different theories (integer numbers, bit vectors, arrays..) Given a set</strong>
+<span id="Notes-of constraints, the solver will generate a satisfying assignment"></span><strong id="of constraints, the solver will generate a satisfying assignment">of constraints, the solver will generate a satisfying assignment</strong>
+</blockquote>
+<blockquote>
+Note on exploration:
+In order to hit interesting paths quicker when analysing large systems, JDart needs to be 
+able to limit exploration to certain paths. <span id="Notes-JDart provides configuration options for"></span><strong id="JDart provides configuration options for">JDart provides configuration options for</strong>
+<span id="Notes-specifying multiple pre-determined vectors of input values from which the exploration starts"></span><strong id="specifying multiple pre-determined vectors of input values from which the exploration starts">specifying multiple pre-determined vectors of input values from which the exploration starts</strong>
+<span id="Notes-It also allows the user to specify assumptions on input parameters as symbolic constarints"></span><strong id="It also allows the user to specify assumptions on input parameters as symbolic constarints">It also allows the user to specify assumptions on input parameters as symbolic constarints</strong>
+After those are specified the exploration will be bound by the provided constarints. Finally,
+<span id="Notes-JDart can be configured to simply skip exploration of certain parts of a program."></span><strong id="JDart can be configured to simply skip exploration of certain parts of a program.">JDart can be configured to simply skip exploration of certain parts of a program.</strong>
+</blockquote>
+      
+<ol>
+<li>
+The executor executes (obviously) the analysed program and records symbolic constraints 
+
+</ol>
+<blockquote>
+For execution the JPF engine is used that suppotrts native peers, symbolic objects and 
+Concolic Bytecode Semantics. Using it has several benefits such as ease of JDart extension 
+by integration of existing JPF plugins/extenstions. JPF provides easy access to all objects 
+on the heap and stack ans well as to other elements of the JVM (stack frames and classloaders)
+However, using a full-blown custon JVM (which JPF is) has significant impact on performance..
+Thats why the JPF integration in JDart is very loose (possibly swapped to a more light-weight
+implementation in the future)
+</blockquote>
+      
+<ol>
+<li>
+Provides a few useful plugins, such as: 
+
+<ol>
+<li>
+Method summarisation
+
+<li>
+JUnit test case generation (leverages the results of dynamic symbolic analysis)
+
+</ol>
+<li>
+<span id="Notes-Can be used as a symbolic execution component within other tools"></span><strong id="Can be used as a symbolic execution component within other tools">Can be used as a symbolic execution component within other tools</strong> 
+
+<ol>
+<li>
+PSYCHO   -- tool that uses automata learning and dyn symb exec to automatically 
+      generate extended interfaces for java library components
+
+<li>
+JPF-Doop -- tool that combines random feedback-directed generation of method sequences 
+      with dynamic symbolic execution for automatic testing of java libraries
+
+</ol>
+<li>
+Has been proven to work and thoroughly tested by NASA (they have used it to generate 
+   tests for the air traffic control system - so it practically is proven to be correct)
+
+<li>
+By default, JDart treats only parameters symbolically 
+
+<ol>
+<li>
+<span id="Notes-But this could be extended to instance fields and return values as well"></span><strong id="But this could be extended to instance fields and return values as well">But this could be extended to instance fields and return values as well</strong>
+
+</ol>
+<li>
+JDart is designed to allow for easy replacement of all of its components, supports different 
+   and combined constraint solvers and several exploration strategies and termination criteria
+
+<li>
+JDart provides an interface for implementing customised termination strategies (time vs paths)
+
+<li>
+Progress in only made when evaluating semantics in solvers 
+
+</ol>
+
+
+<div id="Notes-Dynamic Symbolic Execution"><h2 id="Dynamic Symbolic Execution" class="header"><a href="#Notes-Dynamic Symbolic Execution" class="justcenter">Dynamic Symbolic Execution</a></h2></div>
+<blockquote>
+<em>The devil is not as black as he is painted</em> 
+</blockquote>
+
+<ol>
+<li>
+Executes programs with concrete and symbolic inputs at the same time
+
+<li>
+Maintains a path constraint (conjunction of symbolic expressions over the inputs that is 
+   updated whenever a branch instruction is executed)
+
+<li>
+Combined execution paths for a constraints tree, which is continuously expanded
+
+<li>
+Concrete data values for excercising these paths are generated by a constraint solver 
+
+</ol>
+
+
+<div id="Notes-JDart Architecture"><h2 id="JDart Architecture" class="header"><a href="#Notes-JDart Architecture" class="justcenter">JDart Architecture</a></h2></div>
+<ol>
+<li>
+Executes java bytecode and performs dynamic symbolic analysis of <span id="Notes-JDart Architecture-specific paths"></span><strong id="specific paths">specific paths</strong> <em>???</em>
+
+<li>
+Implements extensions that build upon the analysis 
+
+<ol>
+<li>
+The Method Summariser -- generates flly abstract method summaries for analysied methods. 
+      In the generated summaries, class members, input parameters and return values are symbolic.
+
+<li>
+The Tests Suite Generator -- generates a JUnit test suit that excercises all the paths found
+
+</ol>
+</ol>
+
+
+<div id="Notes-JConstraints"><h2 id="JConstraints" class="header"><a href="#Notes-JConstraints" class="justcenter">JConstraints</a></h2></div>
+<ol>
+<li>
+Constraint solver abstration layer                                      
+
+<li>
+Provides representaion for logic expressions, <span id="Notes-JConstraints-unified"></span><strong id="unified">unified</strong> access to different SMT and interpolation
+   solvers and useful tools and algorithms for working with constraints
+
+<li>
+<span id="Notes-JConstraints-Plugins for connecting to basic constraint solvers are easy to implement through solver"></span><strong id="Plugins for connecting to basic constraint solvers are easy to implement through solver">Plugins for connecting to basic constraint solvers are easy to implement through solver</strong>
+   <span id="Notes-JConstraints-interface"></span><strong id="interface">interface</strong> and taking care of translating between a solver-specific API and the object 
+   representaion of JConstraints
+
+<li>
+Supports user-defined types -- easy to validate solutions returned by constraint solvers 
+   by simply evaluating the path constraint stored by JConstraints with java semantics
+
+</ol>
+<blockquote>
+<em>Date the paper</em>
+</blockquote>
+<div id="Notes-JDart vs SPF"><h2 id="JDart vs SPF" class="header"><a href="#Notes-JDart vs SPF" class="justcenter">JDart vs SPF</a></h2></div>
+<ol>
+<li>
+SPF can work with concolic execution (switch to concrete values - concolic)
+
+<li>
+Parallelising SPF has been done
+
+<li>
+Method summarisation for SPF
+
+<li>
+JDart does not support programs with concurrency... SPF does
+
+<li>
+SPF - lazy initialisation (to deal with unbounded symbolic input data)
+
+<li>
+SPF crashes with Z3, leaving CORAL as the only viable solver, which means that it ignores some 
+   constraints
+
+<li>
+JDart generates stronger test suites   
+
+<li>
+More stable and way more consistent...
+
+</ol>
+
+
+<div id="Notes-Installation"><h2 id="Installation" class="header"><a href="#Notes-Installation" class="justcenter">Installation</a></h2></div>
+<ol>
+<li class="done4">
+Install jpf-core                                      
+
+<li class="done4">
+Install jdart
+
+<li class="done4">
+Install z3 
+    from ( <a href="https://github.com/Z3Prover/z3/releases/download/z3-4.4.1/z3-4.4.1-x64-debian-8.2.zip">https://github.com/Z3Prover/z3/releases/download/z3-4.4.1/z3-4.4.1-x64-debian-8.2.zip</a> ) 
+    mvn isntall it to a local repository
+    place the libz3java.so and libz3.so into a global java lib folder
+
+<li class="done4">
+Install JConstraints mvn install to a local repo
+
+<li class="done4">
+Install JConstraints-z3
+
+<li class="done4">
+Copy jars from target in JConstraints-z3 to ~/.jconstraints/extensions/ 
+
+<li class="done4">
+Copy com.microsoft.z3.jar to ~/.jconstraints/extensions
+
+</ol>
+
+</body>
+</html>

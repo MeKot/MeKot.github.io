@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>BigTable</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;"><h1 id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;" class="header"><a href="#Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;" class="justcenter">Notes on "BigTable: A Distributed Storage System for Structured Data"</a></h1></div>
+<blockquote>
+<em>By Google</em>
+</blockquote>
+
+
+<ol>
+<li>
+What is the problem that this paper is trying to solve?
+
+<ul>
+<li>
+Create a scalable distributed storage that could be used as a repository
+       for their other products
+
+</ul>
+<li>
+Main idea
+
+<ul>
+<li>
+Create storage as a key-value storage
+
+<li>
+Data is indexed by a row key a column key and a timestamp
+
+<li>
+Moving away form RDBS
+
+<li>
+More flexible as a storage -- shifting data layout control to the end product/user
+
+<li>
+Advantage over RDBS ~&gt; Search is easy
+
+<li>
+Each cell in the BigTable also contains multiple versions of the same data (by timestamp)
+
+</ul>
+<li>
+Implementation:
+
+<ul>
+<li>
+Uses Chubby (highly available distributed lock system at Google)
+
+<li>
+When Chubby is down so is BigTable (the experiments shown that the
+      coupling although tight, at scale is negligible)
+
+<li>
+Library linked to every client:
+
+<ul>
+<li>
+Caches tablet locations
+
+<li>
+If the location of a tablet is unknown, it moves up the tablet
+            location hierarchy
+
+<li>
+If the clients cache is empty, the location algorithm requires three
+            network round trips, including one read from Chubby
+
+<li>
+If the clients cache is stale, the location algorithm could take up
+            to 6 round trips, since stale entries are inly discovered upon misses
+
+<li>
+Prefetches tablet location to reduce access time
+
+</ul>
+<li>
+Master server (single):
+
+<ul>
+<li>
+Responsible for:
+
+<ul>
+<li>
+Assigning tablets to tablet servers
+
+<li>
+Detecting the addition and expiration of tablet servers
+
+<li>
+Balancing tablet server load
+
+<li>
+Garbage collection on the GFS
+
+<li>
+Handles schema changes (how? Sends updates to each tablet server affected?)
+
+</ul>
+</ul>
+<li>
+Tablet servers (many):
+
+<ul>
+<li>
+Can be dynamically added or removed
+
+<li>
+Responsible for:
+
+<ul>
+<li>
+Manages a set of tablets (2-1000)
+
+<li>
+Handles read/write requests to the tablets that it has loaded
+
+<li>
+Splits tablets that have grown too large
+
+</ul>
+</ul>
+<li>
+Client data does not move through the master, clients communicate
+        directly with the tablet servers
+
+<li>
+Clients do not rely on the master for tablet location information,
+        hence master is lightly loaded in practice
+
+<li>
+A cluster stores a number of tables, each consists of a set of tablets
+        and each tablet has all data associated with the row range
+
+<li>
+As the table grows, it is automatically split into multiple tablets, each
+        appx 100-200 MB in size
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Tablet location:
+
+<ul>
+<li>
+File stored in Chubby that contains the location of the root tablet
+
+<li>
+Root tablet contains all the locations of the all tablets in a METADATA table
+
+<li>
+Each METADATA tablet contains the location of a set of user tablets
+
+<li>
+The root tablet is the first tablet in METADATA and is never split
+            (to ensure that that tablet location hierarchy has no more than three
+            levels)
+
+<li>
+See Implementation for details
+
+</ul>
+<li>
+Tablet assignment:
+
+<ul>
+<li>
+Each tablet is assigned to one tablet server at a time
+
+<li>
+Master keeps track of the live tablet servers (including which tablets are unassigned)
+
+<li>
+When the tablet is unassigned and there is a tablet server with
+            sufficient room, the master sends the tablet load request to that
+            server (thus assigning the tablet to that server)
+
+<li>
+Chubby keeps track of tablet servers:
+
+<ul>
+<li>
+When the tablet server starts it creates and assigns an exclusive
+                lock on a uniquely-named file in Chubby directory
+
+<li>
+The master monitors the directory to discover tablet servers
+
+<li>
+A tablet server stops serving tablets if it looses its lock
+                (network problems causing the end of a Chubby session)
+
+<li>
+A tablet server then attempts to reacquire it's lock (if the file exists)
+
+<li>
+If the file does not exist, the tablet server can never become
+                operational, so it kills itself
+
+<li>
+Whenever the cluster server terminates (because cluster servers
+                machine has been removed from the cluster), it releases the lock
+                allowing the master to reassign tablets quickly.
+
+</ul>
+<li>
+Master is detecting when the tablet server is no longer serving its tablets:
+
+<ul>
+<li>
+Master asks each tablet server for the status of its lock
+
+<li>
+Or if the master was unable to reach the server in the last several attempts,
+                the master attempts to acquire that servers lock in Chubby
+
+<ul>
+<li>
+If the master is able to get the lock -&gt; the server is dead:
+
+<ul>
+<li>
+Its chubby lockfile is deleted (so it can never serve again)
+
+<li>
+The master moves all the tablets assigned to the now dead
+                        server into the set of unassigned tablets
+
+</ul>
+</ul>
+<li>
+The master kills itself if its Chubby session expires
+                (master failure does not change the assignment of tablets to servers)
+
+</ul>
+<li>
+Master startup:
+
+<ol>
+<li>
+Grab the unique master lock in Chubby
+
+<li>
+Scan the servers directory in Chubby to discover live servers
+
+<li>
+Communicate with every live tablet server to discover which
+                tablets are assigned to it
+
+<li>
+Add the root tablet to the set of unassigned tablets if it was
+                not discovered in step 3
+
+<li>
+Scan the METADATA table to learn the set of tablets (adding
+                unknown tablets to the unassigned list)
+
+</ol>
+<li>
+Master is able to track all the changes as it initiates all of them (but tablet merge)
+
+<li>
+Tablet split:
+
+<ul>
+<li>
+Initiated by the tablet server
+
+<li>
+Tablet server updates the METADATA table with the new tablet
+
+<li>
+When the split is committed, the master is notified
+                <em>If lost, the split is detected at the load stage for the tablet that was split</em>
+
+</ul>
+</ul>
+<li>
+Tablet serving:
+
+<ul>
+<li>
+Persistent state of a tablet is stored on the GFS
+
+<li>
+Updates are committed to a commit log that stores redo records
+
+<li>
+Recently committed changes are stored in memory, in a sorted buffer (memtable)
+
+<li>
+Older updates are stored in a sequence of SSTables
+
+<li>
+Recovering a tablet:
+
+<ul>
+<li>
+Tablet server reads the list of SSTables comprising a tablet (from METADATA)
+
+<li>
+Tablet server reads a set of redo points from commit logs
+
+<li>
+The server then reads the indices of the SSTables into memory and
+                applies all of the updates that have committed since the redo points
+
+</ul>
+<li>
+Write operations:
+
+<ul>
+<li>
+Tablet server checks that the request is well-formed, and authenticates it
+
+<li>
+Authorisation is performed by reading a list of permitted writers from Chubby
+
+<li>
+A valid mutation is written to the commit log (Small mutations
+                are aggregated into a group commit)
+
+<li>
+After the write is committed, its contents are inserted into the memtable
+
+</ul>
+<li>
+Read operations:
+
+<ul>
+<li>
+Well-formed / authenticated
+
+<li>
+Read is executed on a merged view of the sequence of SSTables and the memtable
+
+<li>
+Since both are sorted in a lexicographic order, the view can be formed efficiently
+
+</ul>
+<li>
+Incoming reads and writes can continue while tablets are split and merged
+
+</ul>
+<li>
+Compactions:
+
+<ul>
+<li>
+When the memtable size reaches a threshold (writes fill it up):
+
+<ul>
+<li>
+Memtable is frozen
+
+<li>
+New memtable is created
+
+<li>
+Old (frozen) memtable is converted into an SSTable and written to GFS
+
+<li>
+<em>This shrinks the memory usage of a tablet server</em>
+
+<li>
+<em>This reduces the amount of data that has to be read from the</em>
+                <em>commit log during recovery</em> (if server dies)
+
+<li>
+<span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-This does not block incoming reads and writes"></span><strong id="This does not block incoming reads and writes">This does not block incoming reads and writes</strong>
+
+<li>
+The process is called <sup><small>minor compaction</small></sup>
+
+</ul>
+<li>
+Every minor compaction creates a new SSTable, hence, eventually reads
+            will have to merge an arbitrary number of those, solution is:
+
+<ul>
+<li>
+<sup><small>merging compaction</small></sup>
+
+<li>
+Converts the contents of a few SSTables (and the memtable) into exactly one SSTable
+
+<li>
+The inputs SSTables and the memtable can be discarded as soon as its done
+
+</ul>
+<li>
+A merging compaction that rewrites <span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-all"></span><strong id="all">all</strong> SSTables into one is called <sup><small>major compaction</small></sup>:
+
+<ul>
+<li>
+SSTables produced by non-major compaction can have special
+                <em>deletion</em> entries that suppress data that is still present in
+                some live SSTables
+
+<li>
+Major compaction produces a single SSTable, hence, no need for deletion entries
+
+<li>
+Major compaction is applied regularly
+
+<li>
+<em>Allows to reclaim resources</em>
+
+<li>
+<em>Ensures that deleted data disappears from the system in a timely fashion</em>
+
+</ul>
+</ul>
+<li>
+Refinements (optimisations):
+
+<ul>
+<li>
+Locality groups:
+
+<ul>
+<li>
+Clients can group multiple column families into a locality group
+
+<li>
+A separate SSTable is generated for each locality group in each tablet
+
+<li>
+Segregating column families that are not read together allows for faster reads
+
+<li>
+Locality groups allow definition of some parameters (Keep in memory)
+
+</ul>
+<li>
+Compression:
+
+<ul>
+<li>
+Clients can control whether the SSTables for locality groups are compressed
+
+<li>
+Clients can control which compression format is used
+
+<li>
+Compression happens in blocks
+
+<li>
+Two-pass compression
+
+</ul>
+<li>
+Caching for read performance:
+
+<ul>
+<li>
+Two levels of caching
+
+<li>
+Scan Cache:
+
+<ul>
+<li>
+Higher-level
+
+<li>
+Stores key-value pairs returned by SSTable interface to the tablet server code
+
+<li>
+Most useful for applications that tend to read the same data repeatedly
+
+</ul>
+<li>
+Block Cache:
+
+<ul>
+<li>
+Lower-level
+
+<li>
+Caches SSTable blocks that were read from the GFS
+
+<li>
+Benefit applications that exploit spatial locality in data (sequential reads)
+
+</ul>
+</ul>
+<li>
+Bloom filters:
+
+<ul>
+<li>
+Read operation has to read from a joint view of all SSTables that make up a tablet
+
+<li>
+Bloom filters created for SSTables to reduce the number of disk accesses
+
+<li>
+Probabilistically state whether that SSTable contains the desired key-value pair
+
+<li>
+<span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-Most lookups for non-existent rows/columns do not need to touch disk!"></span><strong id="Most lookups for non-existent rows/columns do not need to touch disk!">Most lookups for non-existent rows/columns do not need to touch disk!</strong>
+
+</ul>
+<li>
+Commit-log implementation:
+
+<ul>
+<li>
+Having a simple log per tablet would result in many disk reads/writes
+
+<li>
+Commit log is implemented on a per-tablet-server basis
+
+<li>
+Writes to different tablets are co-mingled in the same physical log file
+
+<li>
+<span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-This complicates recovery"></span><strong id="This complicates recovery">This complicates recovery</strong>
+
+<li>
+The recovery is simplified by sorting all entries by keys &lt;table, row, log seq #&gt;
+
+<li>
+In the sorted output all entries for a tablet are contiguous and in order
+
+<li>
+The sort is parallelised and split among many tablet servers
+
+<li>
+The sorting is coordinated by the master and is initiated when the recovery is needed
+
+<li>
+Commit logging is done on two separate threads to protect against GFS latency spikes
+
+</ul>
+<li>
+Tablet recovery:
+
+<ul>
+<li>
+After the master decides to move the tablet to another server
+
+<li>
+The tablet server does a minor compaction on a tablet
+
+<li>
+Stops serving
+
+<li>
+Another minor compaction (to eliminate any uncompacted state) that arrived during 1st
+
+<li>
+After that the tablet can be loaded into any other server without any recovery
+
+</ul>
+<li>
+Exploiting immutability:
+
+<ul>
+<li>
+All SSTables generated are immutable
+
+<li>
+No need to synchronise reads - easier row concurrency
+
+<li>
+<span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-Memtable is the only mutable structure accessed by both reads and writes"></span><strong id="Memtable is the only mutable structure accessed by both reads and writes">Memtable is the only mutable structure accessed by both reads and writes</strong>
+
+<li>
+Each memtable row is copy on write, which allows parallel reads and writes
+
+<li>
+Removing deleted data == garbage collecting old SSTables
+
+<li>
+Immutability of SSTables means children can share parts of parents SSTable -- speed
+
+</ul>
+</ul>
+</ol>
+
+</body>
+</html>

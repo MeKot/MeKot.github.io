@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Compiler sanitisers</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<div id="Notes on compiler sanitisers"><h1 id="Notes on compiler sanitisers" class="header"><a href="#Notes on compiler sanitisers" class="justcenter">Notes on compiler sanitisers</a></h1></div>
+<blockquote>
+<em>Primarily GCC and maybe Clang</em>
+</blockquote>
+
+<ol>
+<li>
+Compiler-based dynamic analysis at compile time that can reliably detect errors
+
+<li>
+Address Sanitiser:
+
+<ul>
+<li>
+ASan, <code>-fsanitise=address</code>
+
+<li>
+To get reasonable performance, one can use <code>-O1</code>
+
+<li>
+To get nicer stack trace in error messages use <code>-fno-omit-frame-pointer</code>
+
+<li>
+Detects out-of-bounds accesses, use-after-free errors, memory leaks, etc..
+
+<li>
+Can detect stack buffer overflow
+
+<li>
+Accesses in uninstrumented code are not checked (while allocations and accesses after are)
+
+<li>
+Instrumentation is a compiler module that performs an LLVM pass
+
+<li>
+Before each memory access (*addr), add an <sup><small>if_poisoned</small></sup> check that throws an error
+
+<li>
+Memory mapping and instrumentation:
+
+<ul>
+<li>
+Virtual memory is divided in two disjoint classes (Mem and Shadow)
+
+<li>
+Shadow contains metadata about the actual memory used by the application (Mem)
+
+<li>
+Poisoning a byte in application memory means writing a special byte into the Shadow
+          partition
+
+<li>
+Both classes are laid out in a way which makes conversion Shadow&lt;-&gt;Mem fast
+
+<li>
+ASan maps 8 bytes of the application memory to 1 byte of the Shadow memory
+
+</ul>
+<li>
+Shadow memory:
+
+<ul>
+<li>
+All bytes are addresible: shadow_byte = 0
+
+<li>
+No bytes are addresible: shadow_byte &lt; 0
+
+<li>
+First k bytes are addresible: shadow_byte = k
+
+</ul>
+<li>
+In order to catch stack buffer overflow:
+
+<ul>
+<li>
+Allocate a 32 byte poisoned buffer before an array on the stack
+
+<li>
+Allocate a 32 byte poisoned buffer after the array on the stack
+
+<li>
+Buffer the array on the stack to be a multiple of 32 bytes
+
+<li>
+In its current compact mapping implementation, cannot catch partially unaligned OOB
+          accesses. A viable solution is described here
+          (<a href="https://github.com/google/sanitizers/issues/100),">https://github.com/google/sanitizers/issues/100),</a> but it comes at a performance cost
+
+</ul>
+<li>
+The runtime library replaces malloc/free and provides reporting functions like
+      <code>_asan_report_load8</code>
+
+<li>
+New malloc allocates a block of memory with red-zones around it
+
+<li>
+Free poisons shadow values for the entire region and puts the chunk of memory into a
+      quarantine queue
+
+<li>
+<span id="Notes on compiler sanitisers-Cannot deal with globals allocated in the uninstrumented code"></span><strong id="Cannot deal with globals allocated in the uninstrumented code">Cannot deal with globals allocated in the uninstrumented code</strong>
+
+<li>
+More could be found here: <a href="https://github.com/google/sanitizers/wiki/AddressSanitizer">https://github.com/google/sanitizers/wiki/AddressSanitizer</a>
+
+<li>
+False positives:
+
+<ul>
+<li>
+None by design
+
+</ul>
+<li>
+False Negatives:
+
+<ul>
+<li>
+Overflows bypassing the red-zone padding
+
+<li>
+Use-after-free with large allocations in-between
+
+<ol>
+<li>
+Memory may be reused
+
+<li>
+A stale pointer could now access a valid address that was recently allocated
+
+</ol>
+<li>
+Unaligned access partially OOB:
+            <em>int* a = new int[2];</em>                    --&gt; <span id="Notes on compiler sanitisers-Array with range of [0-7] bytes"></span><strong id="Array with range of [0-7] bytes">Array with range of [0-7] bytes</strong>
+            <em>int* pointer = (int*)((char*)a + 6);</em>
+            <em>*pointer = 1;</em>                           --&gt; <span id="Notes on compiler sanitisers-Access out of range [6-9]"></span><strong id="Access out of range [6-9]">Access out of range [6-9]</strong>
+
+<li>
+Cannot detect errors in custom allocators
+
+</ul>
+</ul>
+<li>
+Memory Sanitiser:
+
+<ul>
+<li>
+MSan, <code>-fsanitize=memory</code>
+
+<li>
+Detects uninitialised memory accesses
+
+<li>
+To get nicer stack trace in error messages use <code>-fno-omit-frame-pointer</code>
+
+<li>
+Can track every uninitialised address to its origin with <code>-fsanitize-memory-track-origins</code>
+
+<li>
+Additional functionality (like origin tracking) comes with a higher performance cost
+
+<li>
+MSan implements a subset of the functionality found in <a href="Valgrind.html">Valgrind</a> (but its <span id="Notes on compiler sanitisers-much"></span><strong id="much">much</strong> faster)
+
+<li>
+Bit-level granularity is important for bitfields and bitarrays
+
+<li>
+Algorithm:
+
+<ul>
+<li>
+Shadow each allocated bit with validity bit
+
+<li>
+When uninitialised memory is allocated, set validity to 1
+
+<li>
+Every operation that produces a value is augmented with corresponding change to the
+          validity bit (including copying)
+
+<li>
+Before each read that affects program's observable behaviour, the validity bit is checked
+
+</ul>
+<li>
+False Positives:
+
+<ul>
+<li>
+Interaction with uninstrumented code
+
+<li>
+Initialisations in instrumented code are not intercepted
+
+<li>
+MSan allows marking objects as "safe"
+
+</ul>
+</ul>
+<li>
+Undefined Behaviour Sanitiser:
+
+<ul>
+<li>
+UBSan, <code>-fsanitize=undefined</code>
+
+<li>
+Detects division by 0, overshifts, signed integer overflow, indirect call of a function
+      through a function pointer of the wrong type
+
+<li>
+Saturated add, abs (what happens close to INT_MAX and INT_MIN?)
+
+<li>
+Anything at all can happen
+
+<li>
+UB in C:
+
+<ul>
+<li>
+Signed integer overflow
+
+<li>
+Reading from uninitialised variable
+
+<li>
+Pointing past the last element of an array
+
+<li>
+Aliasing between pointers of different types
+
+<li>
+Calling <code>memcpy</code> with overlapping buffers
+
+</ul>
+<li>
+UB concept:
+
+<ul>
+<li>
+The programming language has rules
+
+<li>
+The compiler assumes that the rules were followed, when optimising the code
+
+<li>
+If the rules are broken, the optimisations can cause some unexpected behaviour
+
+</ul>
+<li>
+Saturated add:
+
+<ul>
+<li>
+x + y is treated mathematically by the compiler
+
+<li>
+The optimiser then removes the final condition guard in the saturated add
+
+</ul>
+<li>
+Abs:
+
+<ul>
+<li>
+Abs(x) is undefined for -2^{31} and otherwise the int is non-negative
+
+<li>
+So, a guard of (abs(x) &lt; 0) is optimised away
+
+</ul>
+<li>
+Security critical example:
+        <em>struct x *str = object-&gt;str;</em>
+        <em>if (!object) {</em>
+            <em>return error;</em>
+        <em>}</em>
+
+<li>
+Why do languages allow undefined behaviour:
+
+<ul>
+<li>
+Catering for diverse hardware:
+
+<ol>
+<li>
+x86 signed addition wraps on overflow
+
+<li>
+MIPS signed addition traps on overflow
+
+</ol>
+<li>
+To allow powerful optimisations:
+
+<ol>
+<li>
+Extending int to long on a 64-bit machine when using int as an address (in a loop)
+
+</ol>
+</ul>
+</ul>
+</ol>
+
+</body>
+</html>

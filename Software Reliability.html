@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Software Reliability</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Notes on Software Reliability 440"><h1 id="Notes on Software Reliability 440" class="header"><a href="#Notes on Software Reliability 440" class="justcenter">Notes on Software Reliability 440</a></h1></div>
+
+<p>
+Read the KLEE paper
+</p>
+
+<div id="Intro"><h1 id="Intro" class="header"><a href="#Intro" class="justcenter">Intro</a></h1></div>
+
+<ol>
+<li>
+Approaches used for improving software reliability:
+
+<ul>
+<li>
+Manual testing (Coverage + Known bugs):
+
+<ul>
+<li>
+No guarantees (no amount of testing can guarantee that you're free of bugs)
+
+<li>
+High Manual Effort
+
+<li>
+Limitation of human thought
+
+</ul>
+<li>
+Coding standards
+
+<li>
+Code Review
+
+<li>
+Tool Support
+
+</ul>
+<li>
+Classifying bugs:
+
+<ul>
+<li>
+General / Genetic bugs:
+
+<ul>
+<li>
+Division or modulo by 0
+
+<li>
+Assertion failure
+
+<li>
+Integer overflow
+
+<li>
+Invalid dynamic cast
+
+</ul>
+<li>
+Memory bugs:
+
+<ul>
+<li>
+Out-of-bounds array access
+
+<li>
+Double free, access after free
+
+<li>
+Dereferencing a null pointer
+
+</ul>
+<li>
+Concurrency bugs:
+
+<ul>
+<li>
+Deadlock
+
+<li>
+Data Races
+
+</ul>
+<li>
+Termination bugs:
+
+<ul>
+<li>
+Infinite loop
+
+<li>
+Unbounded recursion (in a non lazily evaluated language)
+
+</ul>
+<li>
+Functional bugs:
+
+<ul>
+<li>
+Logic error / Incorrect implementation of the algorithm
+
+</ul>
+</ul>
+<li>
+Safety Properties: <sup><small>"The Focus of this course"</small></sup>
+
+<ul>
+<li>
+Can be expressed using assertions and program instrumentation
+
+<li>
+No null dereferences -- insert assertion before each dereference
+
+<li>
+No out-of-bounds access -- assertions
+
+<li>
+No division by zero -- assertions
+
+<li>
+Initialisation, processing and destruction can only be called in sequence
+
+</ul>
+<li>
+Dynamic Analysis:
+
+<ul>
+<li>
+Advantages:
+
+<ul>
+<li>
+Precise (only observes what the program can actually do)
+
+<li>
+Scalable (in many cases proportional to regular execution)
+
+</ul>
+<li>
+Disadvantages:
+
+<ul>
+<li>
+Requires the whole SUT
+
+<li>
+Requires the execution environment or a simulator
+
+<li>
+Usefulness is determined by the test inputs
+
+</ul>
+<li>
+Examples:
+
+<ul>
+<li>
+<a href="Valgrind.html">Valgrind</a> (memory error detection)
+
+<li>
+<a href="Compiler sanitisers.html">Compiler sanitisers</a> (memory and concurrency error detection)
+
+<li>
+<a href="Fuzzing.html">Fuzzing</a>
+
+<li>
+<a href="Symbolic and Concolic execution.html">Symbolic and Concolic execution</a>
+
+<li>
+Control-flow data-flow and write integrity
+
+</ul>
+</ul>
+<li>
+Static Analysis:
+
+<ul>
+<li>
+Advantages:
+
+<ul>
+<li>
+Can detect defects not revealed by existing test cases
+
+<li>
+High coverage: Can potentially prove properties about a large number of possible
+          executions
+
+<li>
+Can be applied to incomplete systems (start early)
+
+<li>
+Highly scalable if applied in a modular fashion
+
+</ul>
+<li>
+Disadvantages:
+
+<ul>
+<li>
+Can be precise, but extremely expensive (cover all possible executions)
+
+<li>
+Can be fast, but extremely imprecise (lots of false positives)
+
+</ul>
+<li>
+Examples:
+
+<ul>
+<li>
+Compilers (warnings)
+
+<li>
+<a href="Safe C Compilers.html">Safe C Compilers</a>
+
+<li>
+Linters (enforce code quality in hope of reducing bugs)
+
+<li>
+Internal tools (e.g. Microsoft's Static Driver Verifier)
+
+</ul>
+</ul>
+<li>
+Types of errors:
+
+<ul>
+<li>
+False positives:
+
+<ul>
+<li>
+Warning about a problem that cannot actually occur
+
+<li>
+Analysis is said to be <span id="Intro-imprecise"></span><strong id="imprecise">imprecise</strong> if it reports a large number of false positives
+
+<li>
+Analysis that may report false positives is said to be <span id="Intro-incomplete"></span><strong id="incomplete">incomplete</strong>
+
+<li>
+<sup><small>Hinder the use of analysis tools in day-to-day usage</small></sup>
+
+</ul>
+<li>
+False Negatives:
+
+<ul>
+<li>
+No warnings reported, while there exists an issue
+
+<li>
+Analyser is called <span id="Intro-unsound"></span><strong id="unsound">unsound</strong> if it reports false negatives
+
+<li>
+<sup><small>Bad when analysing safety critical software</small></sup>
+
+</ul>
+</ul>
+<li>
+<a href="Towards Optimisation-Safe Systems: Analysing the Impact of UB.html">Towards Optimisation-Safe Systems: Analysing the Impact of UB</a>
+
+<li>
+Data Flow Analysis:
+
+<ul>
+<li>
+Derives information about the flow of data along program execution paths
+
+<li>
+Analysis is done in the abstract domain, related to abstract interpretation
+
+<li>
+Data flow analysis framework consists of:
+
+<ul>
+<li>
+A direction of the data flow (forwards or backwards)
+
+<li>
+A family of transfer functions
+
+<li>
+A meet operator
+    -
+
+</ul>
+</ul>
+</ol>
+
+</body>
+</html>

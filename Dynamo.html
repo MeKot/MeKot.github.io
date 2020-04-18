@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Dynamo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Notes on Dynamo: Amazon’s Highly Available Key-value Store"><h1 id="Notes on Dynamo: Amazon’s Highly Available Key-value Store" class="header"><a href="#Notes on Dynamo: Amazon’s Highly Available Key-value Store" class="justcenter">Notes on Dynamo: Amazon’s Highly Available Key-value Store</a></h1></div>
+<blockquote>
+<em>By Amazon</em>
+</blockquote>
+
+<ol>
+<li>
+Background:
+
+<ul>
+<li>
+Simple key-value interface
+
+<li>
+Highly available with a clearly-defined consistency window
+
+<li>
+State is stored as binary objects (blobs) identified by unique keys
+
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-No operations span multiple data items and there is no relational schema"></span><strong id="No operations span multiple data items and there is no relational schema">No operations span multiple data items and there is no relational schema</strong>
+
+<li>
+Dynamo targets applications that need to store relatively small objects (less than 1 MB)
+
+<li>
+They dropped the C from ACID (for higher availability)
+
+<li>
+Scalability is limited
+
+<li>
+Dynamo is assumed to be operating in "safe space" and therefore it lacks security extensions
+
+<li>
+As everything else at Amazon, Dynamo is "eventually consistent"
+
+<li>
+Conflict resolution happens on reads --&gt; "Always writable" service
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Architecture details:
+
+</ol>
+
+<ol>
+<li>
+Interface:
+
+<ul>
+<li>
+Exposes two operations <em>get</em> and <em>put</em>:
+
+<ul>
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-GET(key)"></span><strong id="GET(key)">GET(key)</strong> locates the object replicas associated with the key in the storage system and
+              returns a single object (or a list of objects with conflicting versions) that are
+              stored under that key along with a <em>context</em>
+
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-PUT(key, context, object)"></span><strong id="PUT(key, context, object)">PUT(key, context, object)</strong> operation determines where the replicas of the object
+              should be placed depending on the key and writes replicas to disk (async)
+
+<li>
+<em>context</em> encodes system metadata about the object that is opaque to the caller and
+              includes informations such as the version of the object. This information is stored
+              along with the object in order to verify context validity during <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-PUT"></span><strong id="PUT">PUT</strong>
+
+</ul>
+<li>
+Key and object are both treated as an opaque array of bytes (so... A string?)
+
+<li>
+Key is MD5-hashed to generate an 128 bit identifier
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Partitioning:
+
+<ul>
+<li>
+Output space of a hash function is treated as a "ring"
+
+<li>
+Hash the key and walk the ring to find the node that is responsible for a bigger hash.
+          Store the object under its hashed key in that node
+
+<li>
+To avoid heterogeneity problems, each node has multiple values on the ring (Virtual nodes)
+
+<li>
+Whenever a new node is added, it is assigned to multiple positions ("tokens") on the ring
+
+<li>
+<code>ADVANTAGES:</code> <sup><small>of virtual nodes</small></sup>
+
+<ul>
+<li>
+If a node becomes unavailable, the load handled by it is evenly dispersed among other
+              available nodes
+
+<li>
+Whenever a new node becomes available, it receives roughly a similar amount of load
+              from existing nodes
+
+<li>
+The number of virtual nodes ("tokens") for any given node could be adjusted based on
+              its physical capabilities, allowing for hardware heterogeneity
+
+</ul>
+</ul>
+</ol>
+
+<ol>
+<li>
+Replication:
+
+<ul>
+<li>
+Data is replicated on multiple hosts
+
+<li>
+Each node is in charge of replication and the number of replicas for different keys can
+          vary, as it is configured on the "per-instance" basis
+
+<li>
+The key (and the object gets replicated at the N-1 successive nodes on the ring
+
+<li>
+The list of nodes that are responsible for storing a particular key is called the
+          "preference list"
+
+<li>
+Preference list is constructed to ensure that there are only distinct nodes in it
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Versioning:
+
+<ul>
+<li>
+When the object is updated by the client, but the latest version is not available, the
+          changes are applied to the older version and later on both version are reconciled
+
+<li>
+As an example, items added to cart are never lost, but deleted items can resurface
+
+<li>
+Vector clocks are used to capture causality between different versions of the data:
+
+<ul>
+<li>
+A vector clock is effectively a list of (node, counter) pairs
+
+<li>
+One vector clock is associated with every version of every object
+
+<li>
+If the counters on the first objects clock are &lt;= to all the nodes in the second clock
+              then the first node is an ancestor of the second and can be forgotten
+
+<li>
+Otherwise the two changes are conflicting and need to be merged
+
+</ul>
+<li>
+Whenever an object is updated, the client must specify which version it is updating (via
+          the <em>context</em> included in both - return of <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-GET"></span><strong id="GET">GET</strong> and parameter for <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-PUT"></span><strong id="PUT">PUT</strong>)
+
+<li>
+The <em>context</em> contains the vector clock information
+
+<li>
+When processing the <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-GET"></span><strong id="GET">GET</strong> request, if there are multiple objects that cannot be
+          syntactically reconciled, Dynamo will return a list of them, with corresponding version
+          information for all of them
+
+<li>
+An update using this <em>context</em> is considered to be reconciling all conflicts
+
+<li>
+<span class="todo">TODO</span>: Describe vector clock transformations that happen on conflicts and how they are
+          resolved
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Depths of <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-GET"></span><strong id="GET">GET</strong> and <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-PUT"></span><strong id="PUT">PUT</strong>:
+
+<ul>
+<li>
+Any storage node in Dynamo is eligible to receive requests from clients for any key
+
+<li>
+Node selection by client:
+
+<ol>
+<li>
+Call via a loadbalancer, which will forward it based on the load
+
+<li>
+Call via partition-aware client library that routes requests directly to the handling
+               node
+
+</ol>
+<li>
+The approaches mostly differ by the amount of coupling with Dynamo (and latency)
+
+<li>
+Read and write operations involve the first N healthy nodes in the preference list,
+          skipping over those that are down or inaccessible
+
+<li>
+To maintain consistency, a quorum protocol is used:
+
+<ul>
+<li>
+R - min number of nodes for a successful read
+
+<li>
+W - min number of nodes for a successful write
+
+<li>
+R + W &gt; N
+
+<li>
+The latency of a read/write is dictated by the slowest replica in R/W
+
+<li>
+Hence, each R and W are usually less than N for latency
+
+</ul>
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-PUT:"></span><strong id="PUT:">PUT:</strong>
+
+<ul>
+<li>
+Coordinator generates the vector clock and stores the updated version locally
+
+<li>
+Coordinator sends the new version along with the new vector clock to the N
+              highest-ranked nodes
+
+<li>
+If at least W-1 nodes respond -&gt; write is successful
+
+</ul>
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-GET:"></span><strong id="GET:">GET:</strong>
+
+<ul>
+<li>
+Coordinator requests all existing versions of data for that key from the N
+              highest-ranked nodes
+
+<li>
+Coordinator waits for R responses before returning the result to the client
+
+<li>
+If there are conflicting versions, a vector of all versions is returned (with
+              <em>context</em> for each)
+
+</ul>
+</ul>
+</ol>
+
+<ol>
+<li>
+Failure handling:
+
+<ul>
+<li>
+"Sloppy quorum" -- all reads and writes are performed on the first N healthy nodes in the
+          preference list
+
+<li>
+<span class="todo">TODO</span>: Work through an example on Figure 2, where A has failed
+
+<li>
+Whenever a node receives the update that should have been handled by another node, it also
+          receives a "hint" in its metadata
+
+<li>
+A hint suggests which node was the intended recipient of the replica
+
+<li>
+Nodes have a separate local database for "hinted" replicas
+
+<li>
+If a node detects that some intended recipient has recovered, it will forward the replica
+          to the recovered node and on success will delete it from the local "hinted" store
+
+<li>
+Hinted Handoff ensures that no read/write operation fails because the intended coordinator
+          is down, or because there are some network issues
+
+<li>
+If W==1, writes will be accepted, if at least 1 node is healthy <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-extreme availability"></span><strong id="extreme availability">extreme availability</strong>
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Handling permanent failures:
+
+<ul>
+<li>
+The case where a replica becomes unavailable before it can return the hinted handoff
+
+<li>
+Anti-entropy (replica sync) protocol:
+
+<ul>
+<li>
+<a href="Merkle trees.html">Merkle trees</a> reduce the amount of data that needs to be transferred, allow
+              parallel search through branches
+
+<li>
+E.g: if the hash values of the root are of two trees are equal then the values of the
+              leaf nodes in the trees are equal as well and the nodes require no synchronisation
+
+<li>
+If the root hashes are different --&gt; some of the replicas are different
+
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store------------------------------------THE PROTOCOL--------------------------------------"></span><strong id="-----------------------------------THE PROTOCOL--------------------------------------">-----------------------------------THE PROTOCOL--------------------------------------</strong>
+
+<li>
+Each node maintains a separate Merkle tree for each key range (set of keys covered by
+              one of its virtual nodes)
+
+<li>
+Two nodes exchange the root of the Merkle tree corresponding to the key ranges they
+              share
+
+<li>
+They then traverse the trees to determine exactly which replicas are out of sync
+
+<li>
+One disadvantage is that when a new node joins, the ranges change and all trees need
+              to be recalculated
+
+</ul>
+</ul>
+</ol>
+
+<ol>
+<li>
+Membership and failure detection:
+
+<ul>
+<li>
+A node outage should not immediately be interpreted as a permanent departure and trigger
+          the partition assignment rebalancing
+
+<li>
+There is no automatic membership change --&gt; <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-Requires human intervention"></span><strong id="Requires human intervention">Requires human intervention</strong>
+
+<li>
+The node that serves the membership change writes it to its local history
+
+<li>
+The change is propagated to all nodes with a gossip-based protocol
+
+<li>
+The view of membership is eventually consistent
+
+<li>
+Each node contacts a peer chosen at random every second and the two nodes reconcile their
+          persistent membership change histories
+
+<li>
+The mappings also contain the partitions of the hash space that the node is covering
+          allowing for faster request routing between nodes (direct route)
+
+<li>
+Avoiding logical partitions:
+
+<ul>
+<li>
+Some nodes play the role of <em>seeds</em>
+
+<li>
+<em>Seeds</em> are nodes that are discovered via an external mechanism and are known to all
+              nodes in a Dynamo ring
+
+<li>
+Eventually all nodes will reconcile with a seed, thus avoiding logical partitions
+
+</ul>
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-Failure detection:"></span><strong id="Failure detection:">Failure detection:</strong>
+
+<ul>
+<li>
+Main purpose is to avoid communication with dead nodes during <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-GET"></span><strong id="GET">GET</strong> and <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-PUT"></span><strong id="PUT">PUT</strong>
+
+<li>
+Local notion of failure is sufficient -&gt; Node B is considered failed by node A if B
+              does not respond to A's messages
+
+<li>
+Nodes will periodically retry communication with the "failed" nodes
+
+<li>
+Failure discovery is driven by clients requests and in the absence of those won't
+              happen
+
+<li>
+<span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-No node is automatically marked as departed"></span><strong id="No node is automatically marked as departed">No node is automatically marked as departed</strong> --&gt; <em>requires human intervention</em>
+
+</ul>
+</ul>
+</ol>
+
+<ol>
+<li>
+Adding/Removing Storage Nodes:
+
+<ul>
+<li>
+When X is added to the system it gets assigned a number of tokens, that are scattered on
+          the ring
+
+<li>
+<span class="todo">TODO</span>: Describe a simple scenario where we add a node to the ring on Figure 2 between A &amp; B
+
+<li>
+<span class="todo">TODO</span>: <sup><small>If failed</small></sup> do the removal of a node
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Implementation:
+
+<ul>
+<li>
+Storage nodes have 3 components:
+
+<ol>
+<li>
+Request Coordination:
+
+<ol>
+<li>
+Event-driven messaging substrate (staged message processing pipeline, like in SEDA)
+
+<li>
+Communications are implemented with Java non-blocking IO channels
+
+<li>
+The node receiving a request creates a state machine, it contains:
+
+<ul>
+<li>
+Logic for identifying the nodes responsible for a key
+
+<li>
+Requesting, awaiting responses and potentially retrying
+
+<li>
+Processing replies and packaging the response to the client
+
+</ul>
+<li>
+There is a state machine <em>per each individual request</em>
+
+<li>
+<span class="todo">TODO</span>: Outline the read request state machine
+
+<li>
+After the read request completes the state machine waits for a while for "late"
+              responses. If any of the responses are stale, the coordinator will update
+              corresponding nodes. This process is called <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-read repair"></span><strong id="read repair">read repair</strong>
+
+<li>
+Coordinator for the write is chosen to be the node that replied fastest to the
+              preceding read operation (on the probabilistic expectation that R and W are connected)
+
+</ol>
+<li>
+Membership
+
+<li>
+Failure detection
+
+</ol>
+<li>
+Storage implementation is interfaced and allows for different engines to be plugged in. These
+      differ by the size of objects they store and the storage models (in-memory buffers, etc)
+
+</ul>
+</ol>
+
+<ol>
+<li>
+Lessons Learned:
+
+<ul>
+<li>
+General:
+
+<ul>
+<li>
+Business logic specific reconciliation:
+
+<ol>
+<li>
+The shopping cart example -&gt; added items are never lost, but we can tolerate
+              resurfacing of the deleted items.
+
+</ol>
+<li>
+Timestamp based reconciliation:
+
+<ol>
+<li>
+Last write wins policy
+
+<li>
+Useful for the client session management
+
+</ol>
+<li>
+High performance read engine:
+
+<ol>
+<li>
+Easy to balance what the service is tailored for by adjusting R and W accordingly
+
+</ol>
+</ul>
+<li>
+Balancing Performance and durability:
+
+<ul>
+<li>
+Keeping an in-memory write buffer helped to bridge that gap
+
+</ul>
+<li>
+Ensuring Uniform Load distribution:
+
+<ul>
+<li>
+Uniform key (hash) distribution ensures that the load is uniformly distributed across the
+          ring which ensures that the load is balanced across nodes
+
+</ul>
+</ul>
+</ol>
+
+
+<div id="The rest seems insignificant"><h1 id="The rest seems insignificant" class="header"><a href="#The rest seems insignificant" class="justcenter">The rest seems insignificant</a></h1></div>
+
+</body>
+</html>

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Spanner</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+<div id="Notes on Spanner: Googles Globally-Distributed Database"><h1 id="Notes on Spanner: Googles Globally-Distributed Database" class="header"><a href="#Notes on Spanner: Googles Globally-Distributed Database" class="justcenter">Notes on Spanner: Googles Globally-Distributed Database</a></h1></div>
+<blockquote>
+<em>By Google</em>
+</blockquote>
+
+
+<div id="Notes on Spanner: Googles Globally-Distributed Database-Overview"><h2 id="Overview" class="header"><a href="#Notes on Spanner: Googles Globally-Distributed Database-Overview" class="justcenter">Overview</a></h2></div>
+
+<ol>
+<li>
+General:
+
+<ul>
+<li>
+Externally-consistent distributed transactions
+
+<li>
+It is a database that shards data across multiple sets of Paxos replicas globally
+
+<li>
+Main point of the paper is the True-Time API
+
+<li>
+Clients automatically failover between replicas
+
+<li>
+Re-sharding and migrations are fully automated as well
+
+<li>
+Main purpose is managing cross-datacenter replicated data
+
+<li>
+Wins over BigTable with strong consistency + wide area replication and
+        support for evolving schemas
+
+<li>
+Spanner is a temporal multi-version database
+
+<li>
+Data is stored in the schematised semi-relational tables
+
+<li>
+Data is versioned, each version is timestamped with its commit time
+
+<li>
+Old versions are garbage-collected
+
+<li>
+Spanner exposes general-purpose transactions and exposes an SQL-like query language
+
+</ul>
+<li>
+Interesting features:
+
+<ul>
+<li>
+Replication configurations can be <span id="Notes on Spanner: Googles Globally-Distributed Database-Overview-dynamically"></span><strong id="dynamically">dynamically</strong> controlled at a fine grain by the application
+
+<li>
+Apps can specify constraints to control:
+
+<ul>
+<li>
+Which datacenter has which data
+
+<li>
+How far data is from its users (read latency)
+
+<li>
+How far replicas are from each other (write latency)
+
+<li>
+How many replicas are maintained (durability, availability and read performance)
+
+</ul>
+<li>
+Data can be dynamically and transparently moved between datacenters (resource usage balancing)
+
+<li>
+These features enable Spanner to support consistent backups and consistent MapReduce
+        executions and atomic schema updates (globally, in the presence of ongoing transactions):
+
+<ul>
+<li>
+Externally consistent reads and writes (<em>Difficult to implement in dist dbs</em>)
+
+<li>
+Globally-consistent reads across the db at a timestamp (<em>Difficult to implement in dist dbs</em>)
+
+</ul>
+<li>
+<sup><small>These features</small></sup> Are enabled by globally-meaningful commit timestamps
+
+<li>
+Timestamps reflect serialization order
+
+</ul>
+<li>
+True Time API feature overview:
+
+<ul>
+<li>
+Exposes clock uncertainty
+
+<li>
+If uncertainty is large , Spanner slows down to wait it out
+
+</ul>
+</ol>
+
+<div id="Notes on Spanner: Googles Globally-Distributed Database-Spanner Implementation"><h2 id="Spanner Implementation" class="header"><a href="#Notes on Spanner: Googles Globally-Distributed Database-Spanner Implementation" class="justcenter">Spanner Implementation</a></h2></div>
+
+<ol>
+<li>
+Intro:
+
+<ul>
+<li>
+Spanner deployment is called a <em>universe</em>
+
+<li>
+Spanner is organised as a set of <em>zones</em> (each zone is ~= deployment of BigTable servers)
+
+<li>
+Zones == locations across which data can be replicated
+
+<li>
+Zones are dynamic -&gt; can be added and removed from a running system
+
+<li>
+Zones are a unit of physical isolation (one datacenter can have 1 or more zones)
+
+<li>
+Each zone has a <em>zonemaster</em> and 100-n000 <em>spanservers</em>
+
+<li>
+Zonemaster assigns data to spanservers, spanservers serve the data to clients
+
+<li>
+Per-zone location proxies are used by clients to locate spanservers assigned to serve their
+      data
+
+<li>
+The <em>universe master</em> and <em>placement driver</em> are singletons
+
+<li>
+Universe master -- a console that shows live metrics
+
+<li>
+Placement driver -- handles automatic movement of data across zones (timescale of minutes)
+
+</ul>
+<li>
+Spanservers:
+
+<ul>
+<li>
+Each spanserver is responsible for 100-1000 instances of tablets
+
+<li>
+Tablet:
+
+<ul>
+<li>
+Similar to BigTable abstraction for a bag of (string, timestamp)-&gt;string mappings
+
+<li>
+Not necessarily a single lexicographically contiguous partition of row space
+
+<li>
+A container that may encapsulate many partitions of the row space:
+
+<ul>
+<li>
+Can colocate many directories that are frequently accessed together
+
+</ul>
+</ul>
+<li>
+Spanner assigns timestamps to data (not to keys as BigTable)
+
+<li>
+Each spanserver implements a single Paxos state machine on top of each tablet
+
+<li>
+Each state machine stores its metadata and log in its tablet
+
+<li>
+Paxos writes are logged twice -&gt; once in a tablets log and once in a Paxos log
+
+<li>
+Writes must initiate the Paxos protocol at the leader
+
+<li>
+Reads access data directly from the tablet (at any Replica that is up to date)
+
+<li>
+Collective set of replicas is called a <em>Paxos group</em>
+
+<li>
+At every replica that is a leader the tablet has a lock table to implement concurrency
+      control:
+
+<ul>
+<li>
+<sup><small>Move some of the functionality form Chubby into the service?</small></sup>
+
+<li>
+The lock table contains the state of two-phase locking
+
+<li>
+Maps ranges of keys to lock states
+
+<li>
+Operations that require synchronisation acquire a lock in the lock table
+
+<li>
+Other operations bypass the lock table altogether
+
+</ul>
+<li>
+At every replica that is a leader the spanserver also implements transactions manager:
+
+<ul>
+<li>
+Support distributed transactions
+
+<li>
+Used to implement the <em>participant leader</em> (other replicas -&gt; <em>participant slaves</em>)
+
+<li>
+If a transaction involves only one Paxos group -&gt; it can bypass the transaction manager
+
+<li>
+If it involves more then the leaders coordinate to perform the <em>two-phase commit</em>
+
+</ul>
+<li>
+Two-phase commit:
+
+<ul>
+<li>
+One of the participant groups is chosen as coordinator
+
+<li>
+The participant leader of that group becomes the <em>coordinator leader</em>, same with slaves
+
+</ul>
+<li>
+Directory:
+
+<ul>
+<li>
+Additional abstraction (apart from key-value mappings) that is basically a bucket
+
+<li>
+Set of contiguous keys that share a common prefix
+
+<li>
+Allows apps to control locality of their data by carefully choosing the prefix
+
+<li>
+Unit of data placement -&gt; same replication configuration
+
+<li>
+When data is moved between Paxos groups it is moved directory by directory
+
+<li>
+Smallest unit whose placement can be specified by an application
+
+</ul>
+<li>
+Movedir:
+
+<ul>
+<li>
+Not implemented as a single transaction, instead it registers the start and moves data in
+            the background
+
+<li>
+Background task used to move directories between Paxos groups
+
+<li>
+Adds or removes replicas to Paxos groups
+
+</ul>
+<li>
+Replication:
+
+<ul>
+<li>
+Administrators control the number and types of replicas and use these to create tags
+
+<li>
+An application controls how data is replicated by tagging databases/directories
+
+</ul>
+</ul>
+<li>
+Data Models:
+
+<ul>
+<li>
+Based on schematised semi-relational tables:
+
+<ul>
+<li>
+Because of Megastore and its popularity
+
+</ul>
+<li>
+A query language
+
+<li>
+General-purpose transactions
+
+<li>
+Workflow:
+
+<ul>
+<li>
+Application creates one or more databases in the universe
+
+<li>
+Each database can contain unlimited number of schematised tables
+
+<li>
+Every table is required to have an ordered set of one or more primary-key columns:
+
+<ul>
+<li>
+This lets application control data locality through keys (see <a href="BigTable.html">BigTable</a>)
+
+</ul>
+</ul>
+</ul>
+<li>
+True Time API:
+
+<ul>
+<li>
+Perks:
+
+<ul>
+<li>
+Represents time as <em>TTinterval</em>
+
+<li>
+TTinterval is an interval with bounded time uncertainty
+
+<li>
+Endpoints of TTinterval are of type <em>TTstamp</em>
+
+<li>
+Methods:
+
+<ol>
+<li>
+now -- Returns a TTinterval that is guaranteed to contain the absolute time during
+              which the method was invoked. The interval is generated with error bounds of size half
+              of the interval.
+
+<li>
+after and before are convenience method wrappers around <sup><small>now</small></sup>
+
+</ol>
+<li>
+True Time guarantees that that an invocation, earliest &lt;= absolute time &lt;= latest
+
+</ul>
+<li>
+Implementation:
+
+<ul>
+<li>
+Time masters (set) per datacenter
+
+<li>
+Time slave per machine
+
+<li>
+Master are equipped with GPS clocks <span id="Notes on Spanner: Googles Globally-Distributed Database-Spanner Implementation-and"></span><strong id="and">and</strong> some are using atomic clocks (GPS failover)
+
+<li>
+All masters time references are regularly compared with one another
+
+<li>
+Each master checks the rate against its own clock and evicts itself of there is a
+          substantial divergence
+
+<li>
+Every slave pulls a variety of masters (mix of GPS nearby, GPS far and atomic)
+
+<li>
+Slaves use Mazullo's algorithm to detect and reject liars
+
+<li>
+Slaves synchronise local clocks to non-liars
+
+<li>
+Machines (slaves?) with frequency excursions larger than the worst case are evicted
+
+<li>
+Between synchronisations daemons advertise a slowly increasing time uncertainty based on
+          the worst-case local clock drift.
+
+<li>
+Slaves take into account communication delay with master when calculating uncertainty
+
+</ul>
+<li>
+Concurrency Control:
+
+<ul>
+<li>
+Timestamp management:
+
+<ol>
+<li>
+Read only, read-write and snapshot read transactions
+
+<li>
+Read-only transactions must be predeclared as not having any writes
+
+<li>
+Reads in a read-only transaction are executed at a timestamp with no locks:
+
+<ol>
+<li>
+Incoming writes are not blocked
+
+</ol>
+<li>
+A snapshot read is a read in the past that executes without locking
+
+<li>
+A client can specify a timestamp, or provide the upper bound for staleness and Spanner
+              will pick the timestamp
+
+<li>
+When a server fails clients can continue reads on a different server by repeating the
+              timestamp and the current read position
+
+<li>
+Leader Leases:
+
+<ol>
+<li>
+Timed leases (10 seconds) to make leaders long-lived
+
+<li>
+Potential leader sends a request for lease votes and if it receives a quorum -&gt;
+                   score!
+
+<li>
+As soon as some lease votes expire, the leaders lease ends -&gt; no longer a leader
+
+<li>
+A leader can abdicate and release its slaves from their lease votes
+
+</ol>
+<li>
+Assigning timestamps to RW transactions:
+
+<ol>
+<li>
+Transactional reads and writes use two-phase locking (timestamps can be assigned
+                   at any time, when holding all locks)
+
+<li>
+For a given transaction, the timestamp is the same as the Paxos timestamp
+
+<li>
+Paxos timestamps are assigned in a monotonically increasing order (as the leader
+                   can only assign timestamps during its lease and at any given point in time there
+                   is at most one leader in a Paxos group)
+
+<li>
+<span id="Notes on Spanner: Googles Globally-Distributed Database-Spanner Implementation-Commit Wait:"></span><strong id="Commit Wait:">Commit Wait:</strong> The coordinator leader ensures that clients cannot see any data
+                   committed by Ti until TT.after(commit_i) is true
+
+</ol>
+<li>
+Serving Reads at a timestamp:
+
+<ol>
+<li>
+The monotonicity requirement allows Spanner to determine if a replica is up to
+                   date
+
+<li>
+Every replica tracks the value t_safe, which is the max timestamp at which the
+                   replica is up to date
+
+<li>
+T_safe is the min of the Paxos state machine and transaction managers safe time:
+
+<ol>
+<li>
+Paxos safe time == the timestamp of the highest applied Paxos write
+
+<li>
+T_tm is more complex..: Its infinite at a replica if there are 0 prepared
+                        (but not committed) transactions --&gt; transactions in between two phases of a
+                        two-phase commit. That is because such transactions are unstable, a replica
+                        cannot know if the transaction will be committed. If there are some prepared
+                        and uncommitted transactions, the T_tm is the min of prepare timestamps for
+                        all transactions
+
+</ol>
+</ol>
+<li>
+Assigning timestamps to read-only transactions:
+
+<li>
+R-O executes in two stages:
+
+<ol>
+<li>
+Assign a timestamp S_read (TT.now().latest)
+
+<li>
+Execute transactions reads for a snapshot at S_read. These could be blocked if
+                   the corresponding t_safe has not advanced accordingly
+
+</ol>
+</ol>
+<li>
+Details: (the nitty-gritty)
+
+<ol>
+<li>
+Read-Write Transactions:
+
+<ol>
+<li>
+Like <a href="BigTable.html">BigTable</a> writes in a transaction are buffered at the client until commit
+
+<li>
+Hence, reads in the same transaction will not see the changes introduced by the
+                   writes
+
+<li>
+It goes like this:
+
+<ul>
+<li>
+A client issues reads to the leader replica of the appropriate group
+
+<li>
+While the transaction remains open, the <span id="Notes on Spanner: Googles Globally-Distributed Database-Spanner Implementation-client"></span><strong id="client">client</strong> sends keepalive messages to
+                      other paticipant leaders prevent them from timing out the transaction
+
+<li>
+When all reads are completed and all writes have been buffered, the <span id="Notes on Spanner: Googles Globally-Distributed Database-Spanner Implementation-client"></span><strong id="client">client</strong>
+                      begins a two-phase commit
+
+<li>
+Sends a message to each participants leader with the id of the coordinator and
+                      any buffered writes
+
+</ul>
+<li>
+Commit (non-coordinator):
+
+<ul>
+<li>
+Acquires write locks
+
+<li>
+Chosses a prepare timestamp that is larger than any timestamps it has assigned
+                      before (to preserve monotonicity)
+
+<li>
+Logs prepare record through Paxos
+
+<li>
+Notifies coordinator of its prepare timestamp
+
+</ul>
+<li>
+Commit (coordinator):
+
+<ul>
+<li>
+Acquires write locks
+
+<li>
+Chooses a timestamp for the entire transaction after receiving prepare
+                      timestamps form participants (non-coordinators)
+
+<li>
+Commit timestamp is &gt;= to all prepare timestamps
+
+<li>
+Commit timestamp &gt; TT.now().latest of when coordinator received the commit
+
+<li>
+Commit timestamp &gt; any other timestamp the coordinator had previously assigned
+
+<li>
+Logs a commit record through Paxos (or abouts if it timed out while waiting
+                      for participants)
+
+<li>
+Before allowing th changes to be applied, the coordinato waits for
+                      TT.after(commit_time)
+
+<li>
+Sends the commit timestamp to the client and all participants, applying the
+                      changes
+
+</ul>
+</ol>
+<li>
+Read-Only Transactions:
+
+<ol>
+<li>
+Assigning a timestamp requires a negotiation phase between all of the Paxos
+                   groups involved in the read
+
+<li>
+The notion of <em>scope</em> -&gt; Set of all keys that will be read in the transaction
+
+<li>
+For standalone queries the scope is automatically inferred
+
+<li>
+If there is only on Paxos group serving the read -&gt; client issues R-O transaciton
+                   to that groups leader (Paxos leader)
+
+<li>
+The leader assigns a timestamp and performs the read (usually better than
+                   TT.now().latest)
+
+<li>
+If there are no pending transactions, the timestamp read is the timestamp of the
+                   last committed write
+
+<li>
+If there are multiple groups involved they can either nogotiate the appropriate
+                   (max) time of last committed write, or simply query at TT.now().latest (which may
+                   way for the appropriate amount of time to advance)
+
+</ol>
+<li>
+Schema-Change Transactions:
+
+<ol>
+<li>
+Schema changes are supported within one datacentre
+
+<li>
+Treated as a normal transaction (with a timestamp in the future and "prepare"
+                   stage)
+
+<li>
+Reads/Writes with a smaller timestamp can proceed, while later ones have to block
+
+</ol>
+</ol>
+</ul>
+</ul>
+</ol>
+
+</body>
+</html>

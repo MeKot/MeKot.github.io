@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Concurrent Processes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Concurrent Processes"><h1 id="Concurrent Processes" class="header"><a href="#Concurrent Processes" class="justcenter">Concurrent Processes</a></h1></div>
+<blockquote>
+<em>Maybe better to skip lectures...</em>
+</blockquote>
+
+<ol>
+<li>
+Basic coursework
+
+<li>
+Go programming
+
+<li>
+Material has not changed compared to last year
+
+<li>
+Last part on session types was optional, it is not anymore.
+
+<li>
+Go will not be in exams, but will be in coursework
+
+<li>
+Slides are text-rich
+
+<li>
+Books: (If individual project, then read the advanced book)
+    • Introductory book:
+        Communicating and Mobile Systems: the π-calculus (Milner 1999)
+    • Advanced books:
+        The π-calculus: a Theory of Mobile Processes (Sangiorgi, Walker 2001)
+
+</ol>
+
+<div id="Lecture 1"><h1 id="Lecture 1" class="header"><a href="#Lecture 1" class="justcenter">Lecture 1</a></h1></div>
+<blockquote>
+<em>Pi-calculus</em>
+</blockquote>
+
+<ol>
+<li>
+The π-calculus evolved from (value-passing) CCS, but it is more expressive
+
+</ol>
+
+
+<p>
+```go
+func main() {
+</p>
+<blockquote>
+// Shared buffer with a size
+a := main(chan int, 1)
+b := make(chan bool, 1)
+</blockquote>
+<blockquote>
+go func () {
+a &lt;- 1; // a with the bar on top (send the integer 1 to channel a)
+} ()
+</blockquote>
+<blockquote>
+i := &lt;- a // Input a
+b &lt;- true // Output b
+</blockquote>
+<p>
+}
+```
+</p>
+
+
+<div id="Lecture 2"><h1 id="Lecture 2" class="header"><a href="#Lecture 2" class="justcenter">Lecture 2</a></h1></div>
+<blockquote>
+<em>Pi-calculus</em>
+</blockquote>
+
+<ul>
+<li>
+(ν a)(a⟨b⟩ | (ν c)c⟨a⟩) =α (ν d)(d⟨b⟩ | (ν c)c⟨d⟩ "=α" means that it is alpha-convertible
+
+<li>
+The intuition is that α-conversion preserves each difference between names.
+
+<li>
+Substitution:
+
+<ul>
+<li>
+A substitution {a/x} applied to a process P (denoted by P{a/x}), has the effect of
+        replacing all the free occurrences of x in P with a.
+
+<li>
+If the new name clashes with a bound variable, rename the bound variable (and he binding)
+
+</ul>
+<li>
+Replication:
+
+<ul>
+<li>
+!P ≡ P | !P
+
+<li>
+The way of expressing infinite computation
+
+</ul>
+<li>
+Abstraction of a bound variable:
+
+<ul>
+<li>
+a ̸∈ fn(P) =⇒ P | (ν a)Q ≡ (ν a)(P | Q)
+
+</ul>
+</ul>
+
+<div id="Tutorial 1"><h1 id="Tutorial 1" class="header"><a href="#Tutorial 1" class="justcenter">Tutorial 1</a></h1></div>
+<ul>
+<li>
+ν a creates a new channel a
+
+<li>
+a(x) passes a variable x to a channel a
+
+<li>
+You can output channels (since you know what they are before you output them)
+
+<li>
+You cannot receive channels, since you don't know that what you receive will be a channel
+
+<li>
+A "new"ed channel is bound everywhere within its scope (even if it is outputted)
+
+<li>
+You cannot rename free variables during substitution
+
+<li>
+Substitution does not have to preserve the original meaning of the exepression:
+
+<ul>
+<li>
+In fact, it is the means of altering the expression
+
+</ul>
+<li>
+The variable becomes bound in continuation process if it is received in the earlier
+     parts of the process
+
+</ul>
+<p>
+-
+</p>
+
+</body>
+</html>

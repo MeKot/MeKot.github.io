@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Valgrind</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<div id="Notes on Valgrind"><h1 id="Notes on Valgrind" class="header"><a href="#Notes on Valgrind" class="justcenter">Notes on Valgrind</a></h1></div>
+<blockquote>
+<em>A very curious little minx</em>
+</blockquote>
+
+
+<ol>
+<li>
+Instrumentation framework for building dynamic analysis tools
+
+<li>
+Valgrind vs Sanitisers:
+
+<ul>
+<li>
+Works on binaries (sanitisers require source)
+
+<li>
+Works via interpretation vs instrumentation
+
+<li>
+Can detect more bugs with compile time instrumentation
+
+<li>
+Valgrind is more monolithic, while sanitisers are more specialised
+
+<li>
+Much slower than sanitisers
+
+<li>
+Some sanitisers cannot be combined (ASan + MSan == memcheck)
+
+</ul>
+<li>
+Includes 6 prod-quality tools:
+
+<ul>
+<li>
+Memory error detector
+
+<li>
+Two thread error detector
+
+<li>
+Cache profiler
+
+<li>
+Branch predictor profiler
+
+<li>
+Call-graph generating cache
+
+<li>
+Heap profiler
+
+</ul>
+<li>
+Three experimental tools:
+
+<ul>
+<li>
+Stack/global array overrun detector
+
+<li>
+Heap profiler that examines how the heap blocks are used
+
+<li>
+SimPoint basic block vector generator
+
+</ul>
+<li>
+<span class="todo">TODO</span>: More of this <a href="https://valgrind.org/docs/manual/manual-core.html">https://valgrind.org/docs/manual/manual-core.html</a>
+
+</ol>
+
+</body>
+</html>

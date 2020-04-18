@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Fuzzing</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<div id="Notes on Fuzzing"><h1 id="Notes on Fuzzing" class="header"><a href="#Notes on Fuzzing" class="justcenter">Notes on Fuzzing</a></h1></div>
+<blockquote>
+<em>440 &amp; AFL and maybe JavanWartyPig</em>
+</blockquote>
+
+<ol>
+<li>
+Testing a system using the inputs that are wholly or partially randomly-generated
+
+<li>
+<span id="Notes on Fuzzing-Goal"></span><strong id="Goal">Goal</strong>: Find inputs that make the SUT behave in interesting ways
+
+<li>
+Oracles:
+
+<ul>
+<li>
+Determines if a test case passes or fails
+
+<li>
+Usually an oracle for correctness does not exist (beyond source-code assertions)
+
+<li>
+Derived oracles for correctness testing
+
+</ul>
+<li>
+Generation-based fuzzing:
+
+<ul>
+<li>
+Inputs produced from nothing
+
+</ul>
+<li>
+Mutation-based fuzzing:
+
+<ul>
+<li>
+Inputs produced from modification and/or combination of existing inputs
+
+</ul>
+<li>
+Types of inputs the fuzzer may aim to produce:
+
+<ul>
+<li>
+Totally invalid inputs (random strings)
+
+<li>
+Somewhat malformed inputs (sequences of tokens)
+
+<li>
+Inputs with a degree of validity (sentences in the grammar, but not well-typed)
+
+<li>
+High integrity inputs (well-formed inputs free from any undefined behaviour)
+
+</ul>
+<li>
+Dumb Fuzzing:
+
+<ul>
+<li>
+Generates or mutates inputs without the knowledge of the SUT's input domain
+
+<li>
+Used in the original Fuzzing paper of 1990 that found UB in most of UNIX utilities
+
+<li>
+Could trigger stack overflow, division by 0, maybe an integer overflow
+
+</ul>
+<li>
+Smart Fuzzing:
+
+<ul>
+<li>
+Uses some information about the expected input format
+
+<li>
+Has a high chance of getting stack underflows and signed integer overflows
+
+<li>
+Can be helped by <a href="Compiler sanitisers.html">Compiler sanitisers</a>
+
+</ul>
+<li>
+Feedback-directed Fuzzing:
+
+<ul>
+<li>
+Can be smart or dumb
+
+<li>
+Input generation or mutation procedure is informed by observing the SUT on previous inputs
+
+<li>
+An input can be flagged if it makes the SUT do something noteworthy:
+
+<ul>
+<li>
+Cover new code
+
+<li>
+Consume more memory than usual
+
+<li>
+Log a previously unseen message
+
+<li>
+Execute a particular syscall
+
+</ul>
+<li>
+Having flagged input:
+
+<ul>
+<li>
+Generation-based fuzzer tries to generate inputs with similar properties
+
+<li>
+Mutation-based fuzzer prioritises it over others when making a mutation
+
+</ul>
+<li>
+Intuition:
+
+<ul>
+<li>
+Input providing new coverage exercises the SUT in a new way
+
+<li>
+Related input may push the SUT further into the unknown
+
+<li>
+New message means either more coverage or has a noteworthy (for the SUT) property
+
+</ul>
+</ul>
+<li>
+Black-box fuzzing:
+
+<ul>
+<li>
+SUT is exercised in an unmodified form
+
+<li>
+Advantages:
+
+<ul>
+<li>
+Can be applied to closed source SUT's
+
+<li>
+SUT runs at full speed, enabling higher rate of fuzzing
+
+</ul>
+<li>
+Disadvantages:
+
+<ul>
+<li>
+Feedback-directed fuzzing can only make use of externally-visible behaviour
+
+<li>
+No coverage-directed fuzzing -&gt; May not cover all execution paths
+
+</ul>
+</ul>
+<li>
+Grey-box fuzzing:
+
+<ul>
+<li>
+Instrumentation applied to the SUT, to expose information about its inner workings
+
+<li>
+Typically exposes coverage
+
+<li>
+Instrumentation can be applied at compile or binary level
+
+<li>
+Advantages:
+
+<ul>
+<li>
+A feedback-directed fuzzer has more information to work with
+
+</ul>
+<li>
+Disadvantages:
+
+<ul>
+<li>
+Instrumentation overhead -&gt; Slower rate of fuzzing
+
+<li>
+Compile-time instrumentation requires access to the SUT sources
+
+</ul>
+</ul>
+<li>
+White-box fuzzing:
+
+<ul>
+<li>
+Analysis via constraint solving used to generate inputs that exercise different parts of SUT
+
+<li>
+Can <em>prove</em> to cover all execution paths (given enough time)
+
+<li>
+Known as <a href="Symbolic and Concolic execution.html">Symbolic and Concolic execution</a>
+
+<li>
+In many ways this is not really fuzzing
+
+<li>
+Advantages:
+
+<ul>
+<li>
+Constraint solvers generate inputs that reach hard to hit parts of the SUT
+
+</ul>
+<li>
+Disadvantages:
+
+<ul>
+<li>
+Slow (due to overhead of solving)
+
+<li>
+Heavyweight, requires specialised tool chain
+
+</ul>
+</ul>
+<li>
+AFL:                                                        <sup><small>American Fuzzy Lop</small></sup>
+
+<ul>
+<li>
+Mutation-based, dumb, grey-box fuzzer
+
+<li>
+State of the art fuzzing for security
+
+<li>
+<span class="todo">TODO</span>: Read the paper on AFL
+
+</ul>
+<li>
+Fuzzing compilers:
+
+<ul>
+<li>
+What are the challenges:
+
+<ul>
+<li>
+Absence of an oracle (for code generation)
+
+<li>
+Nondeterminism
+
+<li>
+Lack of clear language semantics
+
+<li>
+Undefined, unspecified and implementation-defined behaviour:
+
+<ol>
+<li>
+Undefined - The standard imposes no requirement
+
+<li>
+Unspecified - The standard defines a set of allowable behaviours to choose at <span id="Notes on Fuzzing-any"></span><strong id="any">any</strong>
+              occurrence
+
+<li>
+Implementation-defined - The standard defines a set of allowable behaviours;the
+              compiler has to choose one and document a consistent behaviour
+
+</ol>
+</ul>
+<li>
+Compilers are non-testable because:
+
+<ul>
+<li>
+There does not exist an oracle (for code generation)
+
+<li>
+It is theoretically possible, but practically too difficult to determine the correct output
+
+</ul>
+<li>
+Ways to solve the absence of an oracle for code generation:
+
+<ul>
+<li>
+Derived oracle -- not absolute source of truth
+
+<li>
+Cross-check implementations:
+
+<ol>
+<li>
+Method:
+
+<ol>
+<li>
+Compile the code with multiple different compilers and compare the output
+
+<li>
+Mismatches indicate bugs
+
+<li>
+Majority is probably correct
+
+<li>
+Known as differential testing
+
+</ol>
+<li>
+Requirements:
+
+<ol>
+<li>
+Program must be deterministic
+
+<li>
+Program must be free from undefined/unspecified behaviour
+
+<li>
+Multiple compilers must exist
+
+<li>
+Compilers must agree on implementation-defined behaviour
+
+</ol>
+</ol>
+<li>
+Cross-check equivalent programs:
+
+<ol>
+<li>
+Method:
+
+<ol>
+<li>
+Compile <em>equivalent</em> programs with one compiler
+
+<li>
+Mismatches indicate bugs
+
+<li>
+Majority is probably correct
+
+<li>
+Is a form of metamorphing testing
+
+</ol>
+<li>
+Requirements:
+
+<ol>
+<li>
+Equivalent programs (obviously)
+
+<li>
+Program must be deterministic
+
+<li>
+Program must be free from undefined/unspecified behaviour
+
+</ol>
+</ol>
+</ul>
+</ul>
+<li>
+Metamorphic testing:
+
+<ul>
+<li>
+No reference implementation (oracle)
+
+<li>
+Exploit the property of an input when mutating it to obtain a result based on the result from
+      the previous input (like <em>sin x</em> == <em>sin x + 2pi</em>)
+
+<li>
+Simply finding a function for input transformation that mutates output in a deterministic way
+
+</ul>
+<li>
+Test case reduction:
+
+<ul>
+<li>
+Transform the input in such a way that the property of interest is preserved
+
+<li>
+C-Reduce is a test case reducer for C programs
+
+</ul>
+</ol>
+
+</body>
+</html>

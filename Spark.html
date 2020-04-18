@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Spark</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing"><h1 id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing" class="header"><a href="#Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing" class="justcenter">Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing</a></h1></div>
+<blockquote>
+<em>Apache (done by Berkley)</em>
+</blockquote>
+
+<div id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Introduction"><h2 id="Introduction" class="header"><a href="#Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Introduction" class="justcenter">Introduction</a></h2></div>
+
+<ol>
+<li>
+RDD - Resilient Distributed Datasets -&gt; A distributed memory abstraction
+
+<li>
+Designed to perform in-memory computations on large clusters in a fault-tolerant manner
+
+<li>
+Reusing data across computations is costly -&gt; you'd need a synchronous GFS that you write to and
+   the IO cost simply becomes too large for huge datasets
+
+<li>
+ Interface based on coarse-grained transformations (map, filter and join) that apply the same
+    operation to many data items -&gt; log the transformations used to build the dataset, not the
+    actual data
+
+<li>
+Hence, if a partition gets lost we have enough data on how it was derived from other partitions
+   to recompute it entirely
+
+</ol>
+
+<div id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Overview Of RDDs"><h2 id="Overview Of RDDs" class="header"><a href="#Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Overview Of RDDs" class="justcenter">Overview Of RDDs</a></h2></div>
+
+<ol>
+<li>
+RDD:
+
+<ul>
+<li>
+RDD - read-only partitioned collection of records
+
+<li>
+RDD can be created via deterministic operations on either persistent storage or another RDD.
+       These operations are referred to as <em>transformations</em>
+
+<li>
+Examples of transformations are map, filter and join
+
+<li>
+RDDs do not need to be materialised at all times, instead they have enough information of how
+      it was derived (<em>lineage</em>) to compute the dataset from its source (e.g. persistent storage)
+
+<li>
+Program cannot reference an RDD that it cannot reconstruct after a failure
+
+<li>
+Users control <em>persistence</em> and <em>partitioning</em> of an RDD to optimise for operations they are
+       going to perform on it
+
+</ul>
+<li>
+Spark interface:
+
+<ul>
+<li>
+Each dataset is represented as an object and transformations are invoked using methods of
+      those objects
+
+<li>
+Start by defining an RDD by using transformations on data in stable storage
+
+<li>
+These new RDDs can be used in <em>actions</em> which are operations that return a value to the
+      application or export data to a storage system (e.g. count, collect, save)
+
+<li>
+Spark computes RDDs <span id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Overview Of RDDs-lazily"></span><strong id="lazily">lazily</strong> (the first time they are used in action)
+
+<li>
+There is a <em>persist</em> method to indicate which RDDs will be used later (and hence must be
+      persisted)
+
+</ul>
+<li>
+<code>Advantages of an RDD model:</code>
+
+<ul>
+<li>
+Compared with Distributed Shared Memory (DSM)
+
+<li>
+RDD can only be created ("written") through coarse-grained transformations
+
+<li>
+RDD is optimal for uses with bulk reads/writes and is more fault tolerant than DSM
+
+<li>
+RDDs do not need sharding and checkpoints as they could be recomputed using lineage
+
+<li>
+RDDs are immutable ~~&gt; slow nodes can be mitigated in the same way MapReduce does it (backups)
+
+<li>
+In bulk operations on RDDs the tasks can better exploit data locality
+
+<li>
+RDDs degrade gracefully when there is not enough memory to store them
+
+</ul>
+</ol>
+
+<div id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Spark API"><h2 id="Spark API" class="header"><a href="#Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Spark API" class="justcenter">Spark API</a></h2></div>
+
+<ol>
+<li>
+To use spark, one needs to write a <em>driver program</em> that connects to the cluster of workers
+
+<li>
+The <em>driver</em> defines 1 or more RDDs and invokes actions on them, it also tracks lineage
+
+</ol>
+
+<div id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-RDD Representation"><h2 id="RDD Representation" class="header"><a href="#Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-RDD Representation" class="justcenter">RDD Representation</a></h2></div>
+
+<ol>
+<li>
+The main issue is tracking lineage across a wide range of transformations
+
+<li>
+Spark represents each RDD as:
+
+<ul>
+<li>
+A set of partitions, which are atomic pieces of the dataset
+
+<li>
+A set of dependencies on parent RDDs
+
+<li>
+A function for computing the dataset based on its parents
+
+<li>
+Metadata about its partitioning scheme and data placement
+
+</ul>
+<li>
+Inter-RDD dependencies:
+
+<ul>
+<li>
+Narrow:
+
+<ul>
+<li>
+Each partition of the parent RDD is used by at most one partition of the child RDD
+
+<li>
+E.g. map
+
+<li>
+Allow pipelined execution on just one cluster node, which can compute all parent
+          partitions
+
+<li>
+Recovery after a node failure is more efficient (since no data needs to be moved around)
+
+</ul>
+<li>
+Wide:
+
+<ul>
+<li>
+Multiple child partitions may depend on the partitions of the parent RDD
+
+<li>
+E.g. join
+
+<li>
+Require data from all parent partitions to be available and to be shuffled across nodes in
+          a MapReduce-like fashion
+
+<li>
+Could require complete re-execution, since a single failed node could cause the loss of a
+          partition from all the ancestors of an RDD
+
+</ul>
+</ul>
+</ol>
+
+<div id="Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Implementation"><h2 id="Implementation" class="header"><a href="#Notes on Spark: A Fault-Tolerant Abstraction for In-Memory Cluster Computing-Implementation" class="justcenter">Implementation</a></h2></div>
+
+<ol>
+<li>
+Scheduling:
+
+<ul>
+<li>
+Takes into account which partitions of an RDD are available in memory
+
+<li>
+On action, the scheduler examines the lineage graph and builds a Direct Acyclic Graph (DAG) of
+      stages to execute
+
+<li>
+Each stage consists of as many pipelined transformations with narrow dependencies as possible
+
+<li>
+The boundaries for the stages are:
+
+<ul>
+<li>
+Shuffle operations required for wide dependencies
+
+<li>
+Already computed partitions that can short-circuit the computation of the parent RDD
+
+</ul>
+<li>
+Scheduler then launches the computation of missing partitions until it reaches the target RDD
+
+<li>
+Tasks are assigned based on data locality using delay scheduling
+
+<li>
+For wide dependencies the intermediate records are materialised in the same way as MapReduce
+      persists the results of intermediate Map operations
+
+<li>
+If a task fails it is re-run on another node as long as its stage's parents are still
+      available
+
+<li>
+If some stages are no longer available they are recomputed in parallel
+
+<li>
+All computations in Spark run in response to the <em>driver</em> actions (user supplied)
+
+</ul>
+<li>
+Interpreter Integration:
+
+<ul>
+<li>
+Run Spark interactively by connecting from the interpreter shell
+
+<li>
+They had to write their own interpreter to modify how code is translated into serialisable
+      objects
+
+</ul>
+<li>
+Memory Management:
+
+<ul>
+<li>
+Three options for storage of persistent RDDs
+
+<li>
+In-memory:
+
+<ul>
+<li>
+Stored as deserialised Java objects
+
+<li>
+Fastest performance (JVM can access each RDD element natively)
+
+</ul>
+<li>
+In-memory:
+
+<ul>
+<li>
+Stored as serialised data
+
+<li>
+Higher memory efficiency for limited memory
+
+</ul>
+<li>
+On-disk:
+
+<ul>
+<li>
+For RDDs that are too large to be kept in RAM, but costly to recompute at each stage
+
+</ul>
+<li>
+Eviction:
+
+<ul>
+<li>
+LRU at the level of RDDs
+
+</ul>
+<li>
+Each instance of Spark on a cluster has its own memory space (no unified memory)
+
+</ul>
+<li>
+Support for Checkpointing:
+
+<ul>
+<li>
+Using lineage to recover every fault may be too expensive (long lineage chains)
+
+<li>
+If we checkpoint some RDDs into persistent storage, we can "split" those lineage chains
+
+<li>
+A lot easier to checkpoint than shmem, since RDDs are read-only
+
+<li>
+No consistency considerations means that the checkpoints can be written on the background
+
+</ul>
+</ol>
+
+</body>
+</html>

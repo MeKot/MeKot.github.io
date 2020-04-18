@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Lessons learned from papers</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="BigTable"><h1 id="BigTable" class="header"><a href="#BigTable" class="justcenter">BigTable</a></h1></div>
+<blockquote>
+<em>Google</em>
+</blockquote>
+
+<ol>
+<li>
+Large distributed systems are vulnerable to many types of failures, not just
+   the standard network partitions and fail-stop failures. E.g. memory and
+   network corruption, large clock skew, hung machines, extended and asymmetric
+   network partitions, bugs in other systems, GFS quotas, planned and unplanned
+   hardware maintenance.
+
+<li>
+Another lesson we learned is that it is important to delay adding new
+   features until it is clear how the new features will be used. For example,
+   we initially planned to support general-purpose transactions in our API.
+   Because we did not have an immediate use for them, however, we did not
+   implement them.
+
+<li>
+The most important lesson we learned is the value of simple designs. Given
+   both the size of our system (about 100,000 lines of non-test code), as well
+   as the fact that code evolves over time in unexpected ways, we have found
+   that code and design clarity are of immense help in code maintenance and
+   debugging.
+
+</ol>
+
+<div id="Dynamo"><h1 id="Dynamo" class="header"><a href="#Dynamo" class="justcenter">Dynamo</a></h1></div>
+<blockquote>
+<em>Amazon</em>
+</blockquote>
+
+<p>
+1.
+</p>
+
+<div id="Spanner"><h1 id="Spanner" class="header"><a href="#Spanner" class="justcenter">Spanner</a></h1></div>
+<blockquote>
+<em>Google</em>
+</blockquote>
+
+<p>
+1.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Project-Specific notes on K8s</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+
+<div id="Resource allocation on Nodes"><h1 id="Resource allocation on Nodes" class="header"><a href="#Resource allocation on Nodes" class="justcenter">Resource allocation on Nodes</a></h1></div>
+<blockquote>
+<em>I have no idea what this was about, but I did it anyways</em>
+</blockquote>
+
+<ol>
+<li>
+K8s knows about nodes compute resources:
+
+<ul>
+<li>
+CPU, memory and storage
+
+<li>
+Controlled via allocatable resources
+
+<li>
+Allocatable resources are owned by k8s from the beginning (static allocation)
+
+<li>
+This page talks about setting this up:
+        <a href="https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable">https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/#node-allocatable</a>
+
+</ul>
+<li>
+Prometheus can natively monitor k8s:
+
+<ul>
+<li>
+Its FOSS
+
+<li>
+Resource metrics are also available (CPU, memory and storage)
+
+<li>
+Prometheus can just monitor things with influx
+
+<li>
+This article talks about setting the PIG stack:
+        <a href="https://medium.com/swlh/monitoring-with-grafana-prometheus-and-influxdb-an-airport-webcams-example-508c04b226b6">https://medium.com/swlh/monitoring-with-grafana-prometheus-and-influxdb-an-airport-webcams-example-508c04b226b6</a>
+
+</ul>
+</ol>
+<p>
+3.
+</p>
+
+</body>
+</html>

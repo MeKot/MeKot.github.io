@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Raft</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+<div id="Raft"><h1 id="Raft" class="header"><a href="#Raft" class="justcenter">Raft</a></h1></div>
+<blockquote>
+<em>And other friends</em>
+</blockquote>
+
+
+<ol>
+<li>
+Consensus Algorithm that is easier to understand than Paxos
+
+<li>
+Leader Election:
+
+<ul>
+<li>
+Every node can become a leader
+
+<li>
+Every node has an election timeout (randomised value within a set interval)
+
+<li>
+Once the election timeout occurs, the node becomes a candidate
+
+<li>
+Candidates send vote requests to all known nodes
+
+<li>
+Once the candidate receives the majority of votes, it becomes the Leader
+
+<li>
+The Leader sends heartbeat ("Append Log") messages to followers
+
+<li>
+If the replica has not received a heartbeat from the leader in its election timeout, it
+      becomes a candidate, etc...
+
+</ul>
+<li>
+Change Propagation:
+
+<ul>
+<li>
+Client sends a change to the leader
+
+<li>
+The change is appended to the leaders log
+
+<li>
+The change is sent to the followers in the next heartbeat
+
+<li>
+An entry is "committed" once the majority of followers acknowledge it
+
+<li>
+Once the entry is committed, the response is sent to the client
+
+</ul>
+<li>
+Resilience:
+
+<ul>
+<li>
+In case of network partitions, raft separates into sub-clusters with their own leaders
+
+<li>
+A sub-cluster with the smaller number of nodes will be unable to commit transactions
+
+<li>
+When the network partition is healed:
+
+<ul>
+<li>
+The leader with the lower follower count (<em>smaller</em>) will step down
+
+<li>
+The <em>smaller</em> and all its followers will rollback their logs to match the <em>bigger</em> one
+
+<li>
+This guarantees preservation of log consistency in the face of network failures
+
+</ul>
+</ul>
+</ol>
+
+<div id="Raft-Sources:"><h2 id="Sources:" class="header"><a href="#Raft-Sources:" class="justcenter">Sources:</a></h2></div>
+<blockquote>
+<em>Good guys cite sources</em>
+</blockquote>
+
+<ol>
+<li>
+Raft homepage: <a href="https://raft.github.io/">https://raft.github.io/</a>
+
+<li>
+Rust bay Area Meetup talks on Raft: <a href="https://onlinexperiences.com/scripts/Server.nxp">https://onlinexperiences.com/scripts/Server.nxp</a>
+
+<li>
+Raft paper: <a href="https://raft.github.io/raft.pdf">https://raft.github.io/raft.pdf</a>
+
+</ol>
+
+</body>
+</html>
