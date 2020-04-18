@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>Article on Monzo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+
+<div id="Microservices at Monzo and what have they done right"><h2 id="Microservices at Monzo and what have they done right" class="header"><a href="#Microservices at Monzo and what have they done right" class="justcenter">Microservices at Monzo and what have they done right</a></h2></div>
+
+<p>
+Every company that develops a custom solution needs to settle on a particular architecture, whether
+it will be a collection of fine-grained microservices, a monolithic application or something in
+between. In recent years microservices have been at the forefront of most books, articles and
+company initiatives [12]. This prompted numerous businesses to adopt the architecture early on
+without considering if it would work for their product and within the company structure.
+Nonetheless, there are also numerous examples where adopting microservices increased the rate of
+iteration and was a good fit for the organisational structure. Monzo are famous for their successful
+use of 1600 microservices in production. For a medium-sized company with about 250 engineers, this
+is all the more impressive. This raises the question of why they are so successful and why other
+companies such as Segment have failed to migrate their architecture to microservices?
+</p>
+
+<div id="The Monzo way"><h2 id="The Monzo way" class="header"><a href="#The Monzo way" class="justcenter">The Monzo way</a></h2></div>
+
+<p>
+Monzo from the ground up were oriented at delivering a fault-tolerant, real-time service to their
+customers and therefore, were building their platform with that in mind. From past examples provided
+by Amazon, Netflix and Twitter they knew that a large monolithic application does not scale well to
+a large number of users and developers [6]. Therefore, a system formed of many small single-purpose
+services appeared to be an optimal solution.
+</p>
+
+<p>
+There are several factors contributing to Monzo's overwhelming success in managing a large fleet of
+microservices. A key principle is that each one of the services is small and context bound. This
+creates additional flexibility when scaling or introducing changes, as well as allowing each
+individual service to be fully self-contained. Changes to self-contained services are quicker to
+deploy than similar changes in the context of a monolithic system, since they do need to be
+recompiled and relinked.  Furthermore, self-contained services are language agnostic, allowing
+different teams to focus on the business problem and use the best tools for the job. An example of
+that would be platform teams using Go, while data analytics teams would use Python, as each one of
+those languages allows them to use highly-specialised and extremely performant libraries for their
+tasks. Another key principle is statelessness and fault tolerance. The two are linked together
+through the operational strategy. At Monzo each service is expected to fail an be redeployed at any
+point and, hence, connected services are built with that in mind. Statelessness therefore is crucial
+in the service design, as any previous state would be lost on redeployment. Another architectural
+decision that appears to have worked well for Monzo is queuing specific jobs and completing them in
+the background. This has decreased the amount of work on the hot path of the request as well as
+created a clear way of adding new non-essential features as a separate service.  There are a few
+strategies employed concerning queue resilience and delivery policy that allow Monzo to separate
+specific tasks from the workload and send them to be processed in a separate service. Finally, Monzo
+are using gossip protocols for communication between services for propagation of non-essential
+information. This created additional channels for communication between services and makes
+maintenance tasks such as configuration propagation easier.
+</p>
+
+<div id="Other examples"><h2 id="Other examples" class="header"><a href="#Other examples" class="justcenter">Other examples</a></h2></div>
+
+<p>
+There are however, some cases where microservices proved to be less advantageous. Segment is a Bay
+Area startup that exposes a unified API for customer-data aggregation and analysis. The API fronts a
+variety of services, such as Google Analytics, Optimisely, etc [13]. Their product therefore is a
+data analysis platform, whereby users would be able to select a number of external data analysis
+systems and aggregate all of their results on a single platform. The unique selling point is that
+all of the data is sent to a single API and is consumed from a single API, thus integration
+complexity and data transformations are abstracted away form the customer [14]. Their approach with
+microservices was creating a single "handler" service for each external analysis system. Observed
+advantages of such an approach were increased speed of iteration for each "handler", as code was no
+longer coupled with the rest of the system and decreased pressure on the system as different
+requests were now handled by different services. Segment grew and connected with additional
+platforms, which required new handlers. Eventually, a lot of common functionality was extracted into
+shared libraries, which made addition of new platforms extremely easy. However, these new
+abstractions came at a cost of managing them. Over time versions of shared libraries used by each
+"handler" diverged from one another which made addition of new changes to them am unnecessarily
+complex task [4].
+</p>
+
+<div id="Why have they failed"><h2 id="Why have they failed" class="header"><a href="#Why have they failed" class="justcenter">Why have they failed</a></h2></div>
+
+<p>
+In order to determine why Segment and others were unsuccessful in introducing microservices to their
+architecture, we could analyse some of the specific details about the company as well as the
+decisions made along the way.
+</p>
+
+<p>
+Segment is a relatively small company that to this day has less than 100 engineers.  Introducing a
+large number of disjoint services each of which needed to be maintained and "owned" by a certain
+team has triggered the Inverse Conway's Law whereby developers like services themselves became
+over-specialised and lost perspective of the entire system [9]. Furthermore, additional complexities
+were introduced for each team as now that had to manage their own deployments, which sometimes
+depended on other teams work.  This leads us to the issue of "dealing with code reuse in a 'share
+nothing' architecture" [2] is considered to be an anti-pattern [5] as it introduces a "dependency
+hell" where each service depends on multiple custom shared libraries. Hence, the observed issue of
+decreasing overall reliability rooted in weakened change control [5] and complicated deployments as
+they were now burdened by shared library version management.
+</p>
+
+<p>
+Another very important issue that Segment ran into was accumulating debt by focusing on feature
+delivery. For a startup, feature delivery is of the utmost importance, as their funding is directly
+related to it.  Microservices are particularly suited for this, as they allow to develop several
+features concurrently and have very quick iteration and release cycles [7]. However, at very high
+rates of iteration, technical debt is accumulated to "just get it done now, and worry about that
+later" [8].  Accumulating large amounts of technical debt, such as not solving the load-balancing
+and scaling problem [4] caused further issues and outages to the point where engineers had to
+manually scale some of the services [4].
+</p>
+
+<p>
+Furthermore, additional complexity was added by splitting the codebase into multiple repositories
+[4].  Such a decision made developers unaware of where some of the code was located, as well as
+further complicated dependency resolution, as dependant services had to be updated in a cascading
+manner [14].
+</p>
+
+<p>
+Finally, one of the biggest reasons why Segment failed to adopt microservices was their reluctance
+to embrace the organisational change in development cycle required for microservices [7]. Their test
+suite was still focused on the overall functionality and was testing live endpoints [4]. Hence,
+running the tests was an expensive and time-consuming operation that slowed down their rate of
+iteration, practically negating all the benefits they have received from adopting microservices in
+the first place.
+</p>
+
+<p>
+Overall, Segment has failed to adopt microservices due to the immaturity of the company and the
+platform [11], lack of a comprehensive test suite that would catch issues early and a rash decision
+to move to a multi-repo structure [15].
+</p>
+
+
+<div id="How did Monzo avoid these problems"><h2 id="How did Monzo avoid these problems" class="header"><a href="#How did Monzo avoid these problems" class="justcenter">How did Monzo avoid these problems</a></h2></div>
+
+<p>
+Monzo were "pragmatic" from the conception building services to be self-contained and aggressively
+binding a service to a specific context [16]. The decision to allocate a service proactively,
+instead of sharing some functionality in a library saved Monzo from the "dependency hell"
+encountered by Segment. Furthermore, to reduce the cost of having so many services, Monzo developed
+their own RPC witch custom load balancing and routing, automatic retries and connection pooling
+[18]. This allowed them to minimise the impact on the latency of user requests, while also
+simplifying creation and integration of a new service. In addition, Monzo structured all of their
+code in a monorepo, which allowed every engineer to have access and be aware of the entire platform
+[1]. A particular attention was given to monitoring whereby each individual service is reporting
+standard metrics such as CPU and memory usage as well as custom metrics for custom alerts, such as a
+sudden influx of customers [17]. Another area of problems Monzo avoided was blocking on calls to
+connecting services by making "much of the work on the backend asynchronous" [18].  Finally, Monzo
+as an organisation was built around microservices and encouraged active communication between
+different teams and departments to the point where an on-call would have to fix issues outside of
+his domain [1]. This created a collaborative engineering culture where teams did not "lock-in" to
+their domain, but rather were capable of working on virtually any part of the system. To simplify
+this tremendous tasks for the engineers, Monzo developed and enforced strict rules on how a service
+is to be defined, connected and internally engineered.
+</p>
+
+<div id="Conclusion"><h2 id="Conclusion" class="header"><a href="#Conclusion" class="justcenter">Conclusion</a></h2></div>
+
+<p>
+Microservices as an architecture appears to be extremely powerful and provides such benefits as
+clear separation of concerns, independent and parallel development on several components at once and
+loose coupling of the subsystems. However, as shown by the Segment, microservices are not a
+universal solution and are hard to implement correctly. Segment as a company had a number of issues
+with the original architecture that they hoped to fix by moving to microservices [14]. Even though
+they did achieve some of the goals by this move [19], it only covered up the underlying issues with
+lack of proper internal testing, underdeveloped organisational structure and platform design that
+was not performant enough. After moving back to monolith, Segment ended up reimplementing most of
+its platform to better address both performance and scalability [19]. Monzo on the other hand
+targeted microservices from the ground-up with its organisational structure. Clear goals and
+expectations for every subsystem as well as strong internal tooling allowed them to control
+technical debt and separation of concerns well. This led to a coherent platform design that Monzo
+actively enforces on all its internal services. Microservices are a more
+scalable software engineering technique compared to monolith [8] and many applications can benefit
+from moving to them [5]. However, the transition is complicated and will likely require
+re-engineering not just internal tooling, but the company structure itself [9].
+</p>
+
+
+<ol>
+<li>
+Talk by Suhail Patel on 2020-02-18 "Building Reliable Distributed Systems"
+
+<li>
+<a href="https://conferences.oreilly.com/software-architecture/sa-eu-2019/public/schedule/detail/78649">https://conferences.oreilly.com/software-architecture/sa-eu-2019/public/schedule/detail/78649</a>
+
+<li>
+<a href="https://www.nginx.com/blog/event-driven-data-management-microservices">https://www.nginx.com/blog/event-driven-data-management-microservices</a>
+
+<li>
+<a href="https://segment.com/blog/goodbye-microservices/">https://segment.com/blog/goodbye-microservices/</a>
+
+<li>
+"Microservices anti-patterns and pitfalls" O'Reilly book by  Mark Richards
+
+<li>
+<a href="https://martinfowler.com/articles/microservices.html">https://martinfowler.com/articles/microservices.html</a>
+
+<li>
+"Production-Ready Microservices" O'Reilly book by Susan J. Fowler
+
+<li>
+<a href="https://blog.couchbase.com/condemn-microservices-architecture-fail-even-start/">https://blog.couchbase.com/condemn-microservices-architecture-fail-even-start/</a>
+
+<li>
+<a href="https://www.atlassian.com/continuous-delivery/microservices/building-microservices">https://www.atlassian.com/continuous-delivery/microservices/building-microservices</a>
+
+<li>
+<a href="https://www.sdxcentral.com/articles/news/segment-struggled-with-microservices-went-back-to-monolith/2018/08/">https://www.sdxcentral.com/articles/news/segment-struggled-with-microservices-went-back-to-monolith/2018/08/</a>
+
+<li>
+<a href="https://www.sdxcentral.com/articles/news/an-influx-of-microservices-creates-new-requirements-for-apm-report-says/2018/05/">https://www.sdxcentral.com/articles/news/an-influx-of-microservices-creates-new-requirements-for-apm-report-says/2018/05/</a>
+
+<li>
+<a href="https://www.sdxcentral.com/articles/news/an-influx-of-microservices-creates-new-requirements-for-apm-report-says/2018/05/">https://www.sdxcentral.com/articles/news/an-influx-of-microservices-creates-new-requirements-for-apm-report-says/2018/05/</a>
+
+<li>
+<a href="https://www.computerworld.com/article/3427824/how-segment-went-from-monolithic-to-microservices-and-back-again.html">https://www.computerworld.com/article/3427824/how-segment-went-from-monolithic-to-microservices-and-back-again.html</a>
+
+<li>
+<a href="https://www.infoq.com/news/2018/07/segment-microservices/">https://www.infoq.com/news/2018/07/segment-microservices/</a>
+
+<li>
+<a href="https://monzo.com/blog/2016/09/19/building-a-modern-bank-backend">https://monzo.com/blog/2016/09/19/building-a-modern-bank-backend</a>
+
+<li>
+<a href="https://monzo.com/blog/2018/07/27/how-we-monitor-monzo">https://monzo.com/blog/2018/07/27/how-we-monitor-monzo</a>
+
+<li>
+<a href="https://www.youtube.com/watch?v=YkOY7DgXKyw">https://www.youtube.com/watch?v=YkOY7DgXKyw</a>
+
+<li>
+<a href="https://segment.com/blog/why-microservices/">https://segment.com/blog/why-microservices/</a>
+
+<li>
+<a href="https://segment.com/blog/introducing-centrifuge/">https://segment.com/blog/introducing-centrifuge/</a>
+
+</ol>
+
+</body>
+</html>
