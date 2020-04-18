@@ -42,7 +42,7 @@ Accesses in uninstrumented code are not checked (while allocations and accesses 
 Instrumentation is a compiler module that performs an LLVM pass
 
 <li>
-Before each memory access (*addr), add an <sup><small>if_poisoned</small></sup> check that throws an error
+Before each memory access (*addr), add an <code>if_poisoned</code> check that throws an error
 
 <li>
 Memory mapping and instrumentation:
@@ -277,7 +277,7 @@ Abs:
 
 <ul>
 <li>
-Abs(x) is undefined for -2^{31} and otherwise the int is non-negative
+Abs(x) is undefined for -2<sup><small>31</small></sup> and otherwise the int is non-negative
 
 <li>
 So, a guard of (abs(x) &lt; 0) is optimised away

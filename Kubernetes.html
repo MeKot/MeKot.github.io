@@ -227,7 +227,7 @@ In k8s a shared IP is assigned to the pod
 Containers on the same pod can communicate with one another using <code>localhost</code>
 
 <li>
-<sup><small>Scheduling happens at the pod level, no the container level</small></sup>
+<span id="Notes on basic building blocks-Scheduling happens at the pod level, no the container level"></span><strong id="Scheduling happens at the pod level, no the container level">Scheduling happens at the pod level, no the container level</strong>
 
 </ul>
 <li>
@@ -288,7 +288,7 @@ From time to time the master may choose to evict the pod from its host
 Pod eviction - kill it and raise a new one somewhere else
 
 <li>
-Preservation of the application state is on the developer (<sup><small>you</small></sup>)
+Preservation of the application state is on the developer (<span id="Notes on basic building blocks-you"></span><strong id="you">you</strong>)
 
 <li>
 Use a shared data store like Redis, Memcached or Cassandra
@@ -356,7 +356,7 @@ When the pod is evicted, the volume is destroyed and all data is lost
 For the life of the pod, every container on it can read and write data to the volume
 
 <li>
-<sup><small>Ephemeral</small></sup> volume
+<em>Ephemeral</em> volume
 
 </ul>
 <li>
@@ -367,7 +367,7 @@ NFS:
 Mounting NFS volume at the pod level
 
 <li>
-<sup><small>Persistent</small></sup> volume
+<em>Persistent</em> volume
 
 </ul>
 <li>
@@ -416,7 +416,7 @@ Max size for prefix is 253 characters
 Values follow the same rules but cannot be longer than 63 characters
 
 <li>
-<sup><small>Neither keys nor values can contain spaces</small></sup>
+<span id="Notes on Cluster creation-Neither keys nor values can contain spaces"></span><strong id="Neither keys nor values can contain spaces">Neither keys nor values can contain spaces</strong>
 
 <li>
 -- Is there a way to statically check your labels to avoid missed routes? --
@@ -453,7 +453,7 @@ Checks the label against a set of acceptable values
 
 <li>
 Can be combined like so
-              environment in (production, test), tier notin (frontend, back-end), partition
+              environment <code>in</code> (production, test), tier <code>notin</code> (frontend, back-end), partition
 
 </ol>
 </ul>
@@ -493,7 +493,7 @@ Therefore it is a component that focuses on availability of the services in the 
 The controller will create and destroy replicas as it needs to
 
 <li>
-Controller operates following a set of rules defined in a <sup><small>pod template</small></sup>
+Controller operates following a set of rules defined in a <em>pod template</em>
 
 <li>
 <span id="Notes on Cluster creation-Pod template:"></span><strong id="Pod template:">Pod template:</strong>

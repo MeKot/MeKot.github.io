@@ -381,7 +381,7 @@ Old (frozen) memtable is converted into an SSTable and written to GFS
 <span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-This does not block incoming reads and writes"></span><strong id="This does not block incoming reads and writes">This does not block incoming reads and writes</strong>
 
 <li>
-The process is called <sup><small>minor compaction</small></sup>
+The process is called <span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-minor compaction"></span><strong id="minor compaction">minor compaction</strong>
 
 </ul>
 <li>
@@ -390,7 +390,7 @@ Every minor compaction creates a new SSTable, hence, eventually reads
 
 <ul>
 <li>
-<sup><small>merging compaction</small></sup>
+<span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-merging compaction"></span><strong id="merging compaction">merging compaction</strong>
 
 <li>
 Converts the contents of a few SSTables (and the memtable) into exactly one SSTable
@@ -400,7 +400,7 @@ The inputs SSTables and the memtable can be discarded as soon as its done
 
 </ul>
 <li>
-A merging compaction that rewrites <span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-all"></span><strong id="all">all</strong> SSTables into one is called <sup><small>major compaction</small></sup>:
+A merging compaction that rewrites <span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-all"></span><strong id="all">all</strong> SSTables into one is called <span id="Notes on &quot;BigTable: A Distributed Storage System for Structured Data&quot;-major compaction"></span><strong id="major compaction">major compaction</strong>:
 
 <ul>
 <li>

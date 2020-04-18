@@ -99,7 +99,7 @@ Globally-consistent reads across the db at a timestamp (<em>Difficult to impleme
 
 </ul>
 <li>
-<sup><small>These features</small></sup> Are enabled by globally-meaningful commit timestamps
+<em>The above features</em> Are enabled by globally-meaningful commit timestamps
 
 <li>
 Timestamps reflect serialization order
@@ -212,9 +212,6 @@ At every replica that is a leader the tablet has a lock table to implement concu
       control:
 
 <ul>
-<li>
-<sup><small>Move some of the functionality form Chubby into the service?</small></sup>
-
 <li>
 The lock table contains the state of two-phase locking
 
@@ -366,12 +363,12 @@ Methods:
 
 <ol>
 <li>
-now -- Returns a TTinterval that is guaranteed to contain the absolute time during
+<code>now</code> -- Returns a TTinterval that is guaranteed to contain the absolute time during
               which the method was invoked. The interval is generated with error bounds of size half
               of the interval.
 
 <li>
-after and before are convenience method wrappers around <sup><small>now</small></sup>
+<code>after</code> and before are convenience method wrappers around <code>now</code>
 
 </ol>
 <li>
