@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Testing of the Linux Kernel</title>
+        <meta name="application-name" content="netdata">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+        <!--bootstrap stuff start-->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- TOC plugin CSS -->
+        <link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css">
+
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+        <!-- TOC plugin JS -->
+        <script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+        <!--bootstrap stuff end-->
+
+        <!--Google Syntax Highlighting-->
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sons-of-obsidian"></script>
+
+        <!-- My own theme -->
+        <link rel="stylesheet" href="style.css">
+
+        <script>
+            $(document).ready(function(){
+                $("table").addClass("table table-condensed table-hover");
+            });
+        </script>
+
+    </head>
+
+
+    <body data-spy="scroll" data-target="#toc">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">Ivan's Wiki</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="index.html">Wiki Home<span class="sr-only">(current)</span></a></li>
+                    </ul>
+                    <form class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+
+        <div class="container-fluid">
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <nav id="toc" data-spy="affix" data-toggle="toc" class="affix well well-sm pull-right">Index</nav>
+                </div><!--col-md-1-->
+                <div class="col-md-9">
+                    <div class="well">
+                        
+
+
+<div id="Testing of the Linux Kernel"><h1 id="Testing of the Linux Kernel" class="header"><a href="#Testing of the Linux Kernel" class="justcenter">Testing of the Linux Kernel</a></h1></div>
+
+<ol>
+<li>
+Static Code analysis:
+
+<ul>
+<li>
+Sparse:
+
+<ul>
+<li>
+Originally written by Linus Torvalds
+
+<li>
+Integrated with Linux source code
+
+<li>
+Designed to find possible faults in the kernel
+
+<li>
+Leverages annotations to perform some semantic checks
+
+<li>
+Example issue that could be discovered:
+
+<ol>
+<li>
+Kernel tries to dereference a user-space pointer (marked with __<em>user</em>)
+
+</ol>
+<li>
+More info here:
+            <a href="https://www.kernel.org/doc/html/v5.5/dev-tools/sparse.html">https://www.kernel.org/doc/html/v5.5/dev-tools/sparse.html</a>
+
+</ul>
+<li>
+Smatch:
+
+<ul>
+<li>
+Developed for Linux Kernel
+
+<li>
+Identifies null pointers, buffer overflows, use after free, deadlocks, use of
+          uninitialised memory, etc.
+
+<li>
+More info here:
+            <a href="http://smatch.sourceforge.net/">http://smatch.sourceforge.net/</a>
+
+</ul>
+<li>
+Coccinelle:
+
+<ul>
+<li>
+Identifies patterns in source code and makes automatic changes
+
+<li>
+Automatic refactoring?..
+
+<li>
+More info hare:
+            <a href="http://coccinelle.lip6.fr/">http://coccinelle.lip6.fr/</a>
+
+</ul>
+</ul>
+<li>
+Test automation tools:
+
+<ul>
+<li>
+<code>ktest</code>:
+
+<ul>
+<li>
+A Perl script available at <code>/tools/testing/ktest</code>
+
+<li>
+Used for automatic compiling, deploying and testing a kernel image from a config file
+
+<li>
+Deploys the image on a remote server and runs a bunch of automated tests
+
+<li>
+More info here:
+            <a href="https://lwn.net/Articles/412302/">https://lwn.net/Articles/412302/</a>
+
+</ul>
+<li>
+<code>kselftest</code>:
+
+<ul>
+<li>
+Testing framework available at <code>/tools/testing/selftests</code>
+
+<li>
+Tests are written in C (or shells script)
+
+<li>
+Tests are run in user space
+
+<li>
+More info here:
+            <a href="https://kselftest.wiki.kernel.org/">https://kselftest.wiki.kernel.org/</a>
+            <a href="https://www.kernel.org/doc/Documentation/kselftest.txt">https://www.kernel.org/doc/Documentation/kselftest.txt</a>
+
+</ul>
+<li>
+The Linux Test Project:
+
+<ul>
+<li>
+A set of automated tests that validates the functionality, robustness, reliability and
+          stability of the kernel
+
+<li>
+Developed and maintained by IBM, Cisco, Fujitsu, SUSE and RedHat
+
+<li>
+More info here:
+            <a href="https://github.com/linux-test-project/ltp">https://github.com/linux-test-project/ltp</a>
+
+</ul>
+<li>
+Autotest:
+
+<ul>
+<li>
+GPL licenced test automation framework with a focus on the Linux kernel
+
+<li>
+Modular tool consisting of a client, server and a web interface
+
+<li>
+Client runs the tests
+
+<li>
+Server controls multiple clients
+
+<li>
+Web interface triggers tests and displays results
+
+<li>
+Provides an infrastructure to automate the execution of tests
+
+<li>
+More info here:
+            <a href="https://github.com/autotest/autotest">https://github.com/autotest/autotest</a>
+
+</ul>
+<li>
+KUnit:
+
+<ul>
+<li>
+Unit testing framework for the Linux kernel
+
+<li>
+Uses user-mode Linux (more info here <a href="https://en.wikipedia.org/wiki/User-mode_Linux)">https://en.wikipedia.org/wiki/User-mode_Linux)</a>
+
+<li>
+More info here:
+            <a href="https://www.kernel.org/doc/html/latest/dev-tools/kunit/index.html">https://www.kernel.org/doc/html/latest/dev-tools/kunit/index.html</a>
+
+</ul>
+<li>
+Fuzzing:
+
+<ul>
+<li>
+Fuzzers used are Trinity and Syzkaller
+
+<li>
+There is an automated bot that tuns Syzkaller continuously
+
+</ul>
+<li>
+Specialised tools:
+
+<ul>
+<li>
+<code>mmtests</code> -- Memory management
+
+<li>
+<code>xfstests</code> -- Testing file systems
+
+<li>
+<code>hackbench</code> -- Testing the scheduler
+
+</ul>
+</ul>
+<li>
+CI:
+
+<ul>
+<li>
+Kernel CI (published here: <a href="https://kernelci.org/):">https://kernelci.org/):</a>
+
+<ul>
+<li>
+Performs automatic build tests on several kernel trees
+
+</ul>
+<li>
+Many more
+
+</ul>
+</ol>
+
+                    </div><!--well-->
+                </div> <!--col-md-8 -->
+            </div> <!-- row -->
+            <hr/>
+        </div>
+        </div><!--container-fluid-->
+    </body>
+
+    <div class="navbar fixed-bottom">
+        <footer>
+            <img src="../img/yoda.png" align="right"/>
+
+            <div class="contact">
+                <p>Did you spot something incorrect or out of place?</p>
+                <p>Drop me an email at: <a href="mailto:contact@kotegov.com">contact@kotegov.com</a>.</p>
+            </div>
+
+            <p class="inspired"> <em>Inspired by: <a href="https://zettelkasten.de/">Zettelkasten</a>.</em></p>
+        </footer>
+
+
+
+
+
+</html>
+
