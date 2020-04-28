@@ -93,6 +93,34 @@ the synchronisation of all C++ standard streams with corresponding C streams if 
 <pre class="brush: cpp">
     ios_base::sync_with_stdio(false);
 </pre>
+<blockquote>
+But wait, there is more! If we call
+</blockquote>
+
+<pre class="brush: cpp">
+    cin.tie(NULL);
+</pre>
+<blockquote>
+We can guarantee the flushing of <code>std::cout</code> before <code>std::cin</code> accepts input.
+</blockquote>
+<blockquote>
+It is also recommended to use <code>std::cout &lt;&lt; '\n';</code> instead of <code>std::endl</code> because <code>endl</code> is
+slower as it forces a flushing stream, which is usually unnecessary.
+</blockquote>
+
+<div id="Fast IO for competitive programming-Differences between `endl` and `'\n'`"><h2 id="Differences between `endl` and `'\n'`" class="header"><a href="#Fast IO for competitive programming-Differences between `endl` and `'\n'`" class="justcenter">Differences between <code>endl</code> and <code>'\n'</code></a></h2></div>
+
+<ol>
+<li>
+<code>endl</code> is a manipulator, not a character, while <code>'\n'</code> is a character
+
+<li>
+<code>endl</code> does not occupy any memory, while <code>'\n'</code> will occupy 1 byte
+
+<li>
+<code>&lt;&lt; endl;</code> essentially performs <code>&lt;&lt; '\n' &lt;&lt; flush;</code>
+
+</ol>
 
                     </div><!--well-->
                 </div> <!--col-md-8 -->

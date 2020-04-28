@@ -271,10 +271,6 @@ When processing the <span id="Notes on Dynamo: Amazon’s Highly Available Key-v
 <li>
 An update using this <em>context</em> is considered to be reconciling all conflicts
 
-<li>
-<span class="todo">TODO</span>: Describe vector clock transformations that happen on conflicts and how they are
-          resolved
-
 </ul>
 </ol>
 
@@ -367,9 +363,6 @@ Failure handling:
 <li>
 "Sloppy quorum" -- all reads and writes are performed on the first N healthy nodes in the
           preference list
-
-<li>
-<span class="todo">TODO</span>: Work through an example on Figure 2, where A has failed
 
 <li>
 Whenever a node receives the update that should have been handled by another node, it also
@@ -518,12 +511,6 @@ Adding/Removing Storage Nodes:
 When X is added to the system it gets assigned a number of tokens, that are scattered on
           the ring
 
-<li>
-<span class="todo">TODO</span>: Describe a simple scenario where we add a node to the ring on Figure 2 between A &amp; B
-
-<li>
-<span class="todo">TODO</span>: <span id="Notes on Dynamo: Amazon’s Highly Available Key-value Store-If failed"></span><strong id="If failed">If failed</strong> do the removal of a node
-
 </ul>
 </ol>
 
@@ -562,9 +549,6 @@ Processing replies and packaging the response to the client
 </ul>
 <li>
 There is a state machine <em>per each individual request</em>
-
-<li>
-<span class="todo">TODO</span>: Outline the read request state machine
 
 <li>
 After the read request completes the state machine waits for a while for "late"
