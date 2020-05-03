@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>NotesOnCPP</title>
+        <meta name="application-name" content="netdata">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+        <!--bootstrap stuff start-->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- TOC plugin CSS -->
+        <link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css">
+
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+        <!-- TOC plugin JS -->
+        <script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+        <!--bootstrap stuff end-->
+
+        <!--Google Syntax Highlighting-->
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sons-of-obsidian"></script>
+
+        <!-- My own theme -->
+        <link rel="stylesheet" href="style.css">
+
+        <script>
+            $(document).ready(function(){
+                $("table").addClass("table table-condensed table-hover");
+            });
+        </script>
+
+    </head>
+
+
+    <body data-spy="scroll" data-target="#toc">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">Ivan's Wiki</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="index.html">Wiki Home<span class="sr-only">(current)</span></a></li>
+                    </ul>
+                    <form class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+
+        <div class="container-fluid">
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <nav id="toc" data-spy="affix" data-toggle="toc" class="affix well well-sm pull-right">Index</nav>
+                </div><!--col-md-1-->
+                <div class="col-md-9">
+                    <div class="well">
+                        
+
+
+<div id="A few words on OOP"><h1 id="A few words on OOP" class="header"><a href="#A few words on OOP" class="justcenter">A few words on OOP</a></h1></div>
+<blockquote>
+Object oriented programming differs from procedural approach (used in C and Go) in a few key
+places. Procedural approach decomposes the problems into smaller problems until those can be
+solved with functions. This creates a conglomerate of functions that all communicate through
+arguments, variables (global, local or static).
+</blockquote>
+<blockquote>
+In addition to this, OOP identifies the <span id="A few words on OOP-keywords"></span><strong id="keywords">keywords</strong> used in the problem statement to determine
+internal hierarchy for those keywords. The keywords then become objects and the hierarchy is
+maintained through inheritance and traits. An object is therefore a <span id="A few words on OOP-limited, well-defined"></span><strong id="limited, well-defined">limited, well-defined</strong>
+<span id="A few words on OOP-structure that contains all information about an entity"></span><strong id="structure that contains all information about an entity">structure that contains all information about an entity</strong>
+</blockquote>
+<blockquote>
+So one might be tempted to define everything in a Java-like way - derived from an abstract
+user-defined Object. This approach is less popular in CPP as it results in tight coupling.
+</blockquote>
+<blockquote>
+To define characteristics of objects we use classes. The idea behind classes is encapsulation
+or information hiding. Instead of exposing the members directly, the class provides a number of
+dedicated functions that interact with its members and mutate its state.
+</blockquote>
+
+
+<div id="A few words on OOP-Function Overloading"><h2 id="Function Overloading" class="header"><a href="#A few words on OOP-Function Overloading" class="justcenter">Function Overloading</a></h2></div>
+<blockquote>
+It is possible to define functions that have the same name, but perform different actions
+However, the compiler needs to be able to derive the prototype of which function to call at
+compile time (otherwise it will produce an error). A way to differentiate would then be the
+number and types of arguments. At compile time, the compiler will rename the functions (process
+known as <code>name mangling</code>). Interestingly, the overloaded functions cannot differ in return type
+only, as it is up to the programmer to use the return value.
+</blockquote>
+
+
+<div id="A few words on OOP-Default arguments"><h2 id="Default arguments" class="header"><a href="#A few words on OOP-Default arguments" class="justcenter">Default arguments</a></h2></div>
+<blockquote>
+Must be known at compile time (and therefore specified at function declaration rather than
+implementation). Could only be on the right side (i.e. this is illegal <code>func( , 6);</code>.
+</blockquote>
+
+
+<div id="A few words on OOP-NULL pointer, 0-pointer and nullptr"><h2 id="NULL pointer, 0-pointer and nullptr" class="header"><a href="#A few words on OOP-NULL pointer, 0-pointer and nullptr" class="justcenter">NULL pointer, 0-pointer and nullptr</a></h2></div>
+<blockquote>
+All zero values are coded as 0. In C++, <code>NULL</code> macro should be avoided in favour of either 0,
+or the <code>nullptr</code>.
+</blockquote>
+
+
+<div id="A few words on OOP-Compiling and merging the C and C++ codebase"><h2 id="Compiling and merging the C and C++ codebase" class="header"><a href="#A few words on OOP-Compiling and merging the C and C++ codebase" class="justcenter">Compiling and merging the C and C++ codebase</a></h2></div>
+<blockquote>
+Normal C function can be used but should be prefixed with <code>extern "C"</code>, like so
+</blockquote>
+
+<pre class="brush: cpp">
+        extern "C" void* xmalloc(int size);
+</pre>
+<blockquote>
+Header files that are to be used in both C and C++ codebases could therefore be defined in the
+following way
+</blockquote>
+
+<pre class="brush: cpp">
+        #ifdef __cplusplus
+        extern "C"
+        {
+        #endif
+
+            /* declaration of C-data and functions are inserted here. E.g., */
+            void *xmalloc(int size);
+
+        #ifdef __cplusplus
+        }
+        #endif
+
+</pre>
+
+
+<div id="A few words on OOP-Local variables"><h2 id="Local variables" class="header"><a href="#A few words on OOP-Local variables" class="justcenter">Local variables</a></h2></div>
+<blockquote>
+Local variables cannot be declared and used in the same statement. For example this would not
+compile:
+</blockquote>
+
+<pre class="brush: cpp">
+        if ((int c = getchar()) &amp;&amp; strchr("aeiou", c))
+            printf("Saw a vowel\n");
+</pre>
+<blockquote>
+While this will since <code>c</code> is initialised in the first if statement and used in the second and
+because <code>c</code> is declared first and then used.
+</blockquote>
+
+<pre class="brush: cpp">
+        if (int c = getchar())             // nested if-statements
+            if (strchr("aeiou", c))
+                printf("Saw a vowel\n");
+
+        {                                  // nested compound statement
+            int c = getchar();
+            if (c &amp;&amp; strchr("aeiou", c))
+               printf("Saw a vowel\n");
+        }
+</pre>
+
+
+<div id="A few words on OOP-Typedef"><h2 id="Typedef" class="header"><a href="#A few words on OOP-Typedef" class="justcenter">Typedef</a></h2></div>
+<blockquote>
+The keyword <code>typedef</code> is still used in cpp, but is no longer required when defining a <code>union</code>,
+<code>strunct</code> or and <code>enum</code>.
+</blockquote>
+<blockquote>
+So this code will compile and work as expected:
+</blockquote>
+
+<pre class="brush: cpp">
+        struct SomeStruct
+        {
+            int     a;
+            double  d;
+            char    string[80];
+        };
+
+        SomeStruct what;
+        what.d = 3.1415;
+</pre>
+
+
+<div id="A few words on OOP-Evaluation order of operands"><h2 id="Evaluation order of operands" class="header"><a href="#A few words on OOP-Evaluation order of operands" class="justcenter">Evaluation order of operands</a></h2></div>
+<blockquote>
+Expressions using postfix operators (like index and member selectors) are evaluated from left
+to right.
+</blockquote>
+<blockquote>
+Assignments are evaluated from right to left
+</blockquote>
+<blockquote>
+Operands of shift operators are evaluated from left to right
+</blockquote>
+<blockquote>
+In addition, when overloading an operator, the function implementing the overloaded operator is
+evaluated like the built-in operator it overloads, and not in the way function calls are
+generally ordered.
+</blockquote>
+
+
+<div id="A few words on OOP-The `const` keyword"><h2 id="The `const` keyword" class="header"><a href="#A few words on OOP-The `const` keyword" class="justcenter">The <code>const</code> keyword</a></h2></div>
+<blockquote>
+The <code>const</code> keyword is a modifier stating that the value of a variable or of an argument may
+not be modified.
+</blockquote>
+<blockquote>
+Variables that are declared <code>const</code> can, in contrast to C, be used to specify the size of an
+array, as in the following example:
+</blockquote>
+
+<pre class="brush: cpp">
+        int const size = 20;
+        char buf[size];             // 20 chars big
+</pre>
+<blockquote>
+Another use of the keyword <code>const</code> is seen in the declaration of pointers, e.g., in
+pointer-arguments.
+</blockquote>
+
+<pre class="brush: cpp">
+        char *const buf;
+</pre>
+<blockquote>
+Whatever is pointed to by <code>buf</code> may not be changed through <code>buf</code>: the chars
+are declared as <code>const</code>. The pointer <code>buf</code> itself however may be changed. A statement like
+<code>*buf = 'a';</code> is therefore not allowed, while <code>++buf</code> is.
+</blockquote>
+<blockquote>
+Finally, in this declaration neither the pointer nor the character will be allowed to change:
+</blockquote>
+
+<pre class="brush: cpp">
+         char const *const buf;
+</pre>
+<blockquote>
+The rule of thumb for the placement of the keyword <code>const</code> is the following: whatever occurs to
+the <em>left</em> to the keyword may not be changed.
+</blockquote>
+<blockquote>
+Here's a recipe that will effortlessly dissect even the most complex declaration:
+</blockquote>
+
+<ol>
+<li>
+Start reading at the variable's name
+
+<li>
+Read as far as possible until you reach the end of the declaration or an (as yet unmatched)
+       closing parenthesis.
+
+<li>
+Return to the point where you started reading, and read backwards until you reach the
+       beginning of the declaration or a matching opening parenthesis.
+
+<li>
+If you reached an opening parenthesis, continue at step 2 beyond the parenthesis where you
+       previously stopped.
+
+</ol>
+<blockquote>
+Here is an example of it in action:
+</blockquote>
+
+<pre class="brush: cpp">
+        char const *(* const (*(*ip)())[])[]
+
+                             ip          // Start at the variable's name:
+                                         //  'ip' is
+
+                             ip)         // Hitting a closing paren: revert
+                             --&gt;
+
+                           (*ip)         // Find the matching open paren:
+                           &lt;-            //  'a pointer to'
+
+                           (*ip)())      // The next unmatched closing par:
+                                --&gt;      //  'a function (not expecting
+                                         //   arguments)'
+
+                         (*(*ip)())      // Find the matching open paren:
+                         &lt;-              //  'returning a pointer to'
+
+                         (*(*ip)())[])   // The next closing par:
+                                   --&gt;   //  'an array of'
+
+                (* const (*(*ip)())[])   // Find the matching open paren:
+                &lt;--------                //  'const pointers to'
+
+                (* const (*(*ip)())[])[] // Read until the end:
+                                      -&gt; //  'an array of'
+
+    char const *(* const (*(*ip)())[])[] // Read backwards what's left:
+    &lt;-----------                         //  'pointers to const chars'
+</pre>
+<blockquote>
+Collecting all the parts, we get for <code>char const *(* const (*(*ip)())[])[]</code>: <code>ip</code> is a pointer
+to a function (not expecting arguments), returning a pointer to an array of <code>const</code> pointers to
+an array of pointers to <code>const</code> chars. This is what <code>ip</code> represents; the recipe can be used to
+parse any declaration you ever encounter.
+</blockquote>
+
+
+<div id="A few words on OOP-Namespaces"><h2 id="Namespaces" class="header"><a href="#A few words on OOP-Namespaces" class="justcenter">Namespaces</a></h2></div>
+<blockquote>
+The notion of namespaces is defining all symbols in a larger context to avoid name conflicts
+that could arise when defining a conflicting function. And example is defining a <code>sin</code> function
+that would operate on degrees, while also wishing to use the <code>std::sin</code> that operates on
+radians.
+</blockquote>
+<blockquote>
+C++ has the infamous <em>scope resolution operator</em> (<code>::</code>) which can be used to point exactly
+which scope the name belongs to.
+</blockquote>
+
+
+<div id="A few words on OOP-Incapsulation"><h2 id="Incapsulation" class="header"><a href="#A few words on OOP-Incapsulation" class="justcenter">Incapsulation</a></h2></div>
+<blockquote>
+<code>public</code>, <code>private</code> and <code>protected</code> that operate as you would expect.
+</blockquote>
+<blockquote>
+<code>class</code> is basically a struct, but with private access modifier set on its members by default.
+</blockquote>
+
+
+<div id="A few words on OOP-References"><h2 id="References" class="header"><a href="#A few words on OOP-References" class="justcenter">References</a></h2></div>
+<blockquote>
+C++ introduces references which act as the synonyms for variables. A reference therefore acts
+as an alias to the variable itself (<span id="A few words on OOP-References-and not a pointer to it!"></span><strong id="and not a pointer to it!">and not a pointer to it!</strong>).
+</blockquote>
+<blockquote>
+References are used to pass modifiable arguments to functions. References help you avoiding
+copy-by-value on function calls as well as passing objects whose modification is an accepted
+side-effect of their use (streams or buffers).
+</blockquote>
+<blockquote>
+As far as the compiler is concerned, references are just <code>const</code> pointers.
+</blockquote>
+<blockquote>
+Here are the rules of thumb for using pointers:
+</blockquote>
+
+<ol>
+<li>
+When a function does not alter its parameters of a built-in or pointer type value parameters
+       should be used, i.e.
+
+</ol>
+
+<pre class="brush: cpp">
+        void some_func(int val)
+        {
+            cout &lt;&lt; val &lt;&lt; '\n';
+        }
+
+        int main()
+        {
+            int x;
+            some_func(x);       // a copy is passed
+        }
+</pre>
+
+<ol>
+<li>
+When a function explicitly must change the values of its arguments, a pointer parameter is
+       preferred. These pointers should preferably be the functions initial parameters. This is
+       called <em>return by argument</em>.
+
+</ol>
+
+<pre class="brush: cpp">
+        void by_pointer(int *valp)
+        {
+            *valp += 5;
+        }
+</pre>
+
+<ol>
+<li>
+When a function does not change the value of its class or struct type arguments, or if the
+       modification of the argument is a trivial side-effect (stream), we can use references.
+       <code>const</code>-references should be used if the function does not modify the argument at all.
+
+</ol>
+
+<pre class="brush: cpp">
+        void by_reference(string const &amp;str)
+        {
+            cout &lt;&lt; str;    // no modification of str
+        }
+
+        int main ()
+        {
+            int x = 7;
+            by_pointer(&amp;x);         // a pointer is passed
+                                    // x might be changed
+            string str("hello");
+            by_reference(str);      // str is not altered
+        }
+</pre>
+<blockquote>
+References play an important role in cases where the argument is not changed by the function
+but where it is undesirable to copy the argument to initialize the parameter. Such a situation
+occurs when a large object is passed as argument, or is returned by the function. In these
+cases the copying operation tends to become a significant factor, as the entire object must be
+copied. In these cases references are preferred.
+</blockquote>
+<blockquote>
+This is because when a reference to an object is passed, the activation of the <em>copy</em>
+<em>constructor</em> is avoided, saving time and memory.
+</blockquote>
+<blockquote>
+Returning references should generally be avoided, but, as an example of where it is useful:
+</blockquote>
+<blockquote>
+The insertion operator <code>&lt;&lt;</code> returns a reference to <code>cout</code> after inserting its right operand
+into the stream.
+</blockquote>
+<blockquote>
+Key pointer vs reference differences:
+</blockquote>
+
+<ol>
+<li>
+A reference cannot exist by itself, i.e., without something to refer to. A declaration of a
+       reference like <code>int &amp;ref;</code> is not allowed; what would ref refer to?
+
+<li>
+References can be declared as external. These references were initialized elsewhere.
+
+<li>
+References may exist as parameters of functions: they are initialized when the function is
+       called.
+
+<li>
+References may be used in the return types of functions. In those cases the function
+       determines what the return value refers to.
+
+<li>
+References may be used as data members of classes. We return to this usage later.
+
+<li>
+Pointers are variables by themselves. They point at something concrete or just ``at
+       nothing''.
+
+<li>
+References are aliases for other variables and cannot be re-aliased to another variable.
+       Once a reference is defined, it refers to its particular variable.
+
+<li>
+Pointers (except for <code>const</code> pointers) can be reassigned to point to different variables.
+
+<li>
+When an address-of operator &amp; is used with a reference, the expression yields the address of
+       the variable to which the reference applies. In contrast, ordinary pointers are variables
+       themselves, so the address of a pointer variable has nothing to do with the address of the
+       variable pointed to.
+
+</ol>
+
+<div id="A few words on OOP-References-Rvalue references"><h3 id="Rvalue references" class="header"><a href="#A few words on OOP-References-Rvalue references" class="justcenter">Rvalue references</a></h3></div>
+<blockquote>
+In C++, temporary (rvalue) values are indistinguishable from <code>const &amp;</code> types. C++ introduces a
+new reference type called an rvalue reference, which is defined as <code>typename &amp;&amp;</code>.
+</blockquote>
+<blockquote>
+The name rvalue reference is derived from assignment statements, where the variable to the left
+of the assignment operator is called an lvalue and the expression to the right of the
+assignment operator is called an rvalue. Rvalues are often temporary, anonymous values, like
+values returned by functions.
+</blockquote>
+<blockquote>
+Therefore, a normal reference is an lvalue reference (<code>typename &amp;</code>).
+</blockquote>
+<blockquote>
+The key to understanding rvalue references is the concept of an anonymous variable. An
+anonymous variable has no name and this is the distinguishing feature for the compiler to
+associate it automatically with an rvalue reference if it has a choice. Before introducing
+some interesting constructions let's first have a look at some standard situations where
+lvalue references are used. The following function returns a temporary (anonymous) value:
+</blockquote>
+
+<pre class="brush: cpp">
+       int intVal()
+       {
+           return 5;
+       }
+</pre>
+<blockquote>
+Although <code>intVal</code>'s return value can be assigned to an <code>int</code> variable it requires copying, which
+might become prohibitive when a function does not return an int but instead some large object.
+A reference or pointer cannot be used either to collect the anonymous return value as the
+return value won't survive beyond that. So the following is illegal (as noted by the compiler):
+</blockquote>
+
+<pre class="brush: cpp">
+        int &amp;ir = intVal();         // fails: refers to a temporary
+        int const &amp;ic = intVal();   // OK: immutable temporary
+        int *ip = &amp;intVal();        // fails: no lvalue available
+</pre>
+<blockquote>
+Apparently it is not possible to modify the temporary returned by <code>intVal</code>. But now consider
+these functions:
+</blockquote>
+
+<pre class="brush: cpp">
+        void receive(int &amp;value)            // note: lvalue reference
+        {
+            cout &lt;&lt; "int value parameter\n";
+        }
+        void receive(int &amp;&amp;value)           // note: rvalue reference
+        {
+            cout &lt;&lt; "int R-value parameter\n";
+        }
+</pre>
+<blockquote>
+When called from <code>main</code> like so:
+</blockquote>
+
+<pre class="brush: cpp">
+        int main()
+        {
+            receive(18);
+            int value = 5;
+            receive(value);
+            receive(intVal());
+        }
+</pre>
+<blockquote>
+It produces the following output:
+</blockquote>
+
+<pre>
+        int R-value parameter
+        int value parameter
+        int R-value parameter
+</pre>
+<blockquote>
+The program's output shows the compiler selecting <code>receive(int &amp;&amp;value)</code> in all cases where it
+receives an anonymous int as its argument. Note that this includes <code>receive(18)</code>: a value 18 has
+no name and thus <code>receive(int &amp;&amp;value)</code> is called. Internally, it actually uses a temporary
+variable to store the 18. Bottom line: the compiler selects the overloaded function using the
+rvalue reference if the function is passed an anonymous value.
+</blockquote>
+<blockquote>
+Rvalue references were added to the language in order to be able to distinguish the two forms
+of references: named values (for which lvalue references are used) and anonymous values (for
+which rvalue references are used). It is this distinction that allows the implementation of
+move semantics and perfect forwarding.
+</blockquote>
+
+<div id="A few words on OOP-More on lvalues, rvalues and friends"><h2 id="More on lvalues, rvalues and friends" class="header"><a href="#A few words on OOP-More on lvalues, rvalues and friends" class="justcenter">More on lvalues, rvalues and friends</a></h2></div>
+<blockquote>
+Historically, the C programming language distinguished between lvalues and rvalues. The
+terminology was based on assignment expressions, where the expression to the left of the
+assignment operator receives a value (e.g., it referred to a location in memory where a value
+could be written into, like a variable), while the expression to the right of the assignment
+operator only had to represent a value (it could be a temporary variable, a constant value or
+the value stored in a variable):
+</blockquote>
+
+<pre>
+       lvalue = rvalue;
+</pre>
+<blockquote>
+C++ adds to this basic distinction several new ways of referring to expressions:
+</blockquote>
+
+<ol>
+<li>
+<code>lvalue</code>: an <code>lvalue</code> in C++ has the same meaning as in C. It refers to a location where a
+       value can be stored, like a variable, a reference to a variable, or a dereferenced pointer.
+
+<li>
+<code>xvalue</code>: an <code>xvalue</code> indicates an expiring value. An expiring value refers to an object
+       just before its lifetime ends. Such objects normally have to make sure that resources they
+       own (like dynamically allocated memory) also cease to exist, but such resources may, just
+       before the object's lifetime ends, be moved to another location, thus preventing their
+       destruction.
+
+<li>
+<code>gvalue</code>: a <code>gvalue</code> is a generalized <code>lvalue</code>. A generalized <code>lvalue</code> refers to anything
+       that may receive a value. It is either an <code>lvalue</code> or an <code>xvalue</code>.
+
+<li>
+<code>prvalue</code>: a <code>prvalue</code> is a pure rvalue: a literal value (like <code>1.2e3</code>) or an immutable
+       object (e.g., the value returned from a function returning a constant <code>std::string</code>
+
+</ol>
+<blockquote>
+An expressions value is an <code>xvalue</code> if it is:
+</blockquote>
+
+<ul>
+<li>
+The value returned by a function returning an <code>rvalue</code> reference to an object;
+
+<li>
+An object that is cast to an <code>rvalue</code> reference
+
+<li>
+An expression accessing a non-static class data member whose object is:
+
+<ul>
+<li>
+An <code>xvalue</code> itself
+
+<li>
+A <code>.*</code> expression (<span id="A few words on OOP-More on lvalues, rvalues and friends-pointer to member"></span><strong id="pointer to member">pointer to member</strong> in which the left-hand side operand is an <code>xvalue</code>)
+
+</ul>
+</ul>
+<blockquote>
+The effect of this rule is that named rvalue references are treated as lvalues and anonymous
+rvalue references to objects are treated as <code>xvalues</code>. Rvalue references to functions are
+treated as lvalues whether anonymous or not.
+</blockquote>
+
+
+<div id="A few words on OOP-Enums"><h2 id="Enums" class="header"><a href="#A few words on OOP-Enums" class="justcenter">Enums</a></h2></div>
+<blockquote>
+Enumeration values in C++ are in fact int values, thereby bypassing type safety. E.g., values
+of different enumeration types may be compared for (in)equality, albeit through a (static) type
+cast.
+</blockquote>
+<blockquote>
+Another problem with the current <code>enum</code> type is that their values are not restricted to the
+<code>enum</code> type name itself, but to the scope where the enumeration is defined. As a consequence,
+two enumerations having the same scope cannot have identical names.
+</blockquote>
+<blockquote>
+Such problems are solved by defining <code>enum</code> classes. An <code>enum</code> class can be defined as in the
+following example:
+</blockquote>
+
+<pre class="brush: cpp">
+        enum class SafeEnum
+        {
+            NOT_OK,     // 0, by implication
+            OK          = 10,
+            MAYBE_OK    // 11, by implication
+        };
+</pre>
+<blockquote>
+Enum classes use int values by default, but the used value type can easily be changed using
+the <code>:</code> type notation, as in:
+</blockquote>
+
+<pre class="brush: cpp">
+       enum class CharEnum: unsigned char
+       {
+           NOT_OK,
+           OK
+       };
+</pre>
+<blockquote>
+To use a value defined in an <code>enum</code> class its enumeration name must be provided as well. E.g.,
+<code>OK</code> is not defined, <code>CharEnum::OK</code> is.
+</blockquote>
+<blockquote>
+A sequence of symbols of a strongly typed enumeration can also be indicated in a switch using
+the ellipsis syntax, as shown in the next example:
+</blockquote>
+
+<pre class="brush: cpp">
+        SafeEnum enumValue();
+
+        switch (enumValue())
+        {
+            case SafeEnum::NOT_OK ... SafeEnum::OK:
+                cout &lt;&lt; "Status is known\n";
+            break;
+            default:
+                cout &lt;&lt; "Status unknown\n";
+            break;
+        }
+</pre>
+
+                    </div><!--well-->
+                </div> <!--col-md-8 -->
+            </div> <!-- row -->
+            <hr/>
+        </div>
+        </div><!--container-fluid-->
+    </body>
+
+    <div class="navbar fixed-bottom">
+        <footer>
+            <img src="../img/yoda.png" align="right"/>
+
+            <div class="contact">
+                <p>Did you spot something incorrect or out of place?</p>
+                <p>Drop me an email at: <a href="mailto:contact@kotegov.com">contact@kotegov.com</a>.</p>
+            </div>
+
+            <p class="inspired"> <em>Inspired by: <a href="https://zettelkasten.de/">Zettelkasten</a>.</em></p>
+        </footer>
+
+
+
+
+
+</html>
+
