@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Exceptions and Safety</title>
+        <meta name="application-name" content="netdata">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+        <!--bootstrap stuff start-->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- TOC plugin CSS -->
+        <link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.css">
+
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+        <!-- TOC plugin JS -->
+        <script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.4.1/dist/bootstrap-toc.min.js"></script>
+        <!--bootstrap stuff end-->
+
+        <!--Google Syntax Highlighting-->
+        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sons-of-obsidian"></script>
+
+        <!-- My own theme -->
+        <link rel="stylesheet" href="style.css">
+
+        <script>
+            $(document).ready(function(){
+                $("table").addClass("table table-condensed table-hover");
+            });
+        </script>
+
+    </head>
+
+
+    <body data-spy="scroll" data-target="#toc">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">Ivan's Wiki</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="index.html">Wiki Home<span class="sr-only">(current)</span></a></li>
+                    </ul>
+                    <form class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+
+        <div class="container-fluid">
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <nav id="toc" data-spy="affix" data-toggle="toc" class="affix well well-sm pull-right">Index</nav>
+                </div><!--col-md-1-->
+                <div class="col-md-9">
+                    <div class="well">
+                        
+
+
+<div id="CPP Exception safety"><h2 id="CPP Exception safety" class="header"><a href="#CPP Exception safety" class="justcenter">CPP Exception safety</a></h2></div>
+<blockquote>
+<em>They were given power over a fourth of the earth to kill by</em>
+<em>sword, famine, plague, and by the wild beasts of the earth.</em>
+</blockquote>
+<blockquote>
+There are four levels (hence the quote).
+</blockquote>
+<blockquote>
+No guarantee:
+</blockquote>
+<blockquote>
+This means that anything can happen if the exception is thrown. Hence, the code with no
+guarantee may leak resources, leave pointers dangling, or invalidate class invariants. Its a
+wild west, essentially.
+</blockquote>
+<blockquote>
+A good example is here:
+</blockquote>
+
+<pre class="brush: cpp">
+        struct DoubleOwnership {
+             std::unique_ptr&lt;int&gt; pi;
+             std::unique_ptr&lt;double&gt; pd;
+
+             DoubleOwnership(int* pi_, double* pd_) : pi{pi_}, pd{pd_} {}
+            };
+
+            int foo() {
+             DoubleOwnership object { new int(42), new double(3.14) };
+             //...
+        }
+</pre>
+<blockquote>
+The problem with this is, that if an exception is thrown in the second <code>new</code>, then the function
+execution stops and it is propagated out. However, memory allocated by the first <code>new</code> has not
+yet been passed to the <code>unique_ptr</code> and therefore will not be freed!
+</blockquote>
+<blockquote>
+Generally, any code that has not been proven to be exception safe should has no guarantee and
+should be considered unsafe. Code without any exception guarantee is hard to work with – we
+cant know for sure the state of the objects after an exception is thrown, which means that we
+possibly even cant properly clean up and destroy them.
+</blockquote>
+<blockquote>
+Basic guarantee:
+</blockquote>
+<blockquote>
+In essence, it is a guarantee that if during the execution of the code an exception is thrown,
+no resources are leaked and object invariants are not violated.
+</blockquote>
+<blockquote>
+While this is better than no guarantee, is is still far from ideal. We have no idea about the
+content and the state of the objects, but we know that we can use and destroy them (as
+invariants are intact). That we can destroy them is probably the most important part of the
+basic guarantee, since a thrown exception will incur some stack unwinding and affected objects
+may get destroyed.
+</blockquote>
+<blockquote>
+Strong guarantee:
+</blockquote>
+<blockquote>
+Adds to the basic guarantee that if an operation fails with an exception, then it leaves the
+objects in the same state they were in before.
+</blockquote>
+<blockquote>
+An example of a strong guarantee is the copy and swap idiom for assignment operators:
+</blockquote>
+
+<pre class="brush: cpp">
+          Strong&amp; operator=(Strong const&amp; other) {
+              Strong temp(other);
+              temp.swap(*this);
+              return *this;
+          }
+</pre>
+<blockquote>
+The steps are simple: first create a copy of the other object. This may throw an exception, but
+if it does, the function is terminated early and nothing has happened to <code>*this</code> or the other
+object yet. Then swap <code>*this</code> with the copy. For this to work, the swap operation may not throw
+any exceptions. Examples are the exchange of a few pointers and other built in types. The swap
+is the commit action, after that the assignment is complete. When the function is left with the
+return statement, the temporary object is destroyed, cleaning up the state previously owned by
+<code>*this</code>.
+</blockquote>
+<blockquote>
+Providing the strong guarantee can be costly. For example, imagine if the <code>Strong</code> object in
+the example allocates large amounts of memory. Instead of reusing the already allocated memory,
+the temporary has to allocate new memory just to release the old one after the swap.
+</blockquote>
+<blockquote>
+<code>Nothrow</code> guarantee:
+</blockquote>
+<blockquote>
+The operation <span id="CPP Exception safety-guarantees"></span><strong id="guarantees">guarantees</strong> not to throw any exception. Some examples of such operations would
+be
+</blockquote>
+<ul>
+<li>
+Destructors (they have to be <code>nothrow</code>, as thy are called during stack unwinding)
+
+<li>
+Any cleanup operations like closing files and releasing memory and anything else called from
+      the destructor has to be <code>nothrow</code>
+
+<li>
+Swap operations (expected to be <code>nothrow</code>)
+
+</ul>
+
+                    </div><!--well-->
+                </div> <!--col-md-8 -->
+            </div> <!-- row -->
+            <hr/>
+        </div>
+        </div><!--container-fluid-->
+    </body>
+
+    <div class="navbar fixed-bottom">
+        <footer>
+            <img src="../img/yoda.png" align="right"/>
+
+            <div class="contact">
+                <p>Did you spot something incorrect or out of place?</p>
+                <p>Drop me an email at: <a href="mailto:contact@kotegov.com">contact@kotegov.com</a>.</p>
+            </div>
+
+            <p class="inspired"> <em>Inspired by: <a href="https://zettelkasten.de/">Zettelkasten</a>.</em></p>
+        </footer>
+
+
+
+
+
+</html>
+
